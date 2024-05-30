@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Joystick</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    {% if robotId %}
+        <script type="text/javascript">
+            window.robotId = "{{ robotId }}";
+        </script>
+        <script src="{{ url_for('static', filename='helper.js') }}"></script>
+        <script src="{{ url_for('static', filename='continous_action_button.js') }}"></script>
+        <script src="{{ url_for('static', filename='server_communication.js') }}"></script>
+        <script src="{{ url_for('static', filename='ui_controller.js') }}"></script>
+        <script src="{{ url_for('static', filename='connection_state.js') }}"></script>
+        <script src="{{ url_for('static', filename='joystick.js') }}"></script>
+    {% endif %}
+</head>
+<body>
+    {% if robotId %}
+   
+    <div style="text-align: center;">
+         <h1>Control {{ robotId | capitalize }} robot!</h1>
+    </div>
+
+        <div class="main-row">
+
+
+            <!-- Moving buttons Column  -->
+            <div id="directionalPad">
+                <button id="forwardButton" class="button forward">W</button>
+                <div class="directionalButtons">
+                    <button id="leftButton" class="button left">A</button>
+                    <button class="button center"></button>
+                    <button id="rightButton" class="button right">D</button>
+                </div>
+                <button id="backwardButton" class="button backward">S</button>
+            </div>
+
+
+            <!-- Canvas enemy Detector and canvasText -->
+            <div id="canvasContainer" class="main-column">
+                <div class="enemy-detectors-wrapper" ></div>
+
+                <div class="line-sensors-container">
+                    <div class="line-sensor"></div>
+                    <div class="line-sensor"></div>
+                    <div class="line-sensor"></div>
+                    <div class="line-sensor"></div>
+                    <div class="line-sensor"></div>
+                </div>
+
+                <canvas id="imageCanvas" width="320" height="240"></canvas>
+
+                <div id="imageText">This text is centered and floats over the canvas.</div>
+            </div>
+        </div>
+       
+
+    {% else %}
+        <h1>This robot is not </h1>
+    {% endif %}
+</body>
+</html>
