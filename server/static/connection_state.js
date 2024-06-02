@@ -33,7 +33,7 @@ class ConnectingServerState extends ConnectionState {
     super(robotController);
   }
   onOpenConnection() {
-    this.robotController.setState(RegistratopmToServerState)
+    this.robotController.setState(RegisteringToServerState)
   }
   start() {
     super.start();
@@ -60,8 +60,6 @@ class RegisteringToServerState extends ConnectionState {
     this.robotController.server.send(CommandType.REGISTER);
   }
   onMessage(command, data) {
-    console.log(command)
-    console.log(data)
     if (command == CommandType.REGISTER) {
       this.robotController.setState(ConnectingToRobotState)
     }

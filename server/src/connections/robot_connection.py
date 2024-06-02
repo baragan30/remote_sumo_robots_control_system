@@ -1,14 +1,8 @@
-from ast import Dict
-import time
-from typing import Any, Callable, Optional
+from typing import Any
 from src.model.robot import Robot
 from src.connections.connection import Connection
 from src.model.user import User
 from src.model.command_type import CommandType
-from src.services.users_manager import UsersManager
-import matplotlib.pyplot as plt
-import time
-
 
 class RobotConnection(Connection):
     def __init__(self, ws: Any) -> None:

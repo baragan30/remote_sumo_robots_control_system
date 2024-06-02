@@ -1,9 +1,10 @@
 import uuid;
-from flask import Flask, render_template,request,jsonify
+from flask import Flask, render_template,jsonify
 from flask_sock import Sock
 from src.connections.robot_connection import RobotConnection
 from src.connections.human_connection import HumanConnection
 from src.services.users_manager import UsersManager
+
 app = Flask(__name__)
 app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 1}
 sock = Sock(app)

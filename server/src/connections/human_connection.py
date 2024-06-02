@@ -1,9 +1,7 @@
 from typing import Any
-from uuid import UUID
 from src.connections.connection import Connection
 from src.model.person import Person
 from src.model.user import User
-from src.services.users_manager import UsersManager
 from src.model.command_type import CommandType
 
 

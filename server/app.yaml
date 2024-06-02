@@ -1,0 +1,2 @@
+runtime: python39  # Update based on the latest supported runtime
+entrypoint: gunicorn -b :$PORT app:app

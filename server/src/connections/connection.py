@@ -1,8 +1,6 @@
 from ast import Dict
 import time
 from typing import Any, Callable, Optional
-from queue import Queue,Empty
-import uuid
 from uuid import UUID
 
 from src.services.users_manager import UsersManager
