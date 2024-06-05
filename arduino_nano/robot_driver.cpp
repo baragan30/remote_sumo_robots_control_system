@@ -68,7 +68,7 @@ void RobotDriver::drive(){
                 spiConnection.addData(COMMAND_RING_EDGE_DATA,line);
             }
             obsDec.detect();
-            spiConnection.addData(COMMAND_DISTANCE_DATA, obsDec.measurements,14);
+            spiConnection.addData(COMMAND_DISTANCE_DATA, obsDec.measurements,13);
             break;
         case ROBOT_DRIVER_AUTONOMOUS_STATE:
             autonomous();

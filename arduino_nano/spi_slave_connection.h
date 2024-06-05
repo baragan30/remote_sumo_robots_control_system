@@ -82,21 +82,22 @@ private:
 class SpiSlaveConnection
 {
 public:
-    static constexpr uint8_t BUFFER_CAPACTITY = 32;
+    static constexpr uint8_t BUFFER_CAPACTITY = 16;
     SpiSlaveConnection(/* args */);
     void init();
     void addData(const uint8_t command, const uint8_t data);
-    void addData(const uint8_t command, const uint8_t data[],const uint8_t size);
+    void addData(const uint8_t command, const uint8_t data[],const uint8_t dataSize);
     uint8_t getData(uint8_t data[]);
     void interrupt();
 private:
     CommitQueue<BUFFER_CAPACTITY> txQueue, rxQueue;
-    volatile uint8_t bytes_to_transmit, bytes_to_receive;
+    volatile uint8_t bytes_to_transmit, bytes_to_receive, nrof1Transmittted;
     // Define the TransmissionState enum
     volatile enum TransmissionState {
         IDLE,           // Waiting for command or data
         NO_BYTES,
         RECEIVING,      // Currently receiving data
+        NR_OF_1,
     } state; 
 
     void commit();

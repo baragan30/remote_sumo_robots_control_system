@@ -14,7 +14,7 @@ public:
     uint8_t* getReceivedData() {return rxData; }
     uint8_t getReceivedDataSize() const { return rxSize; }
 private:
-    static constexpr uint8_t DATA_SIZE = 32; 
+    static constexpr uint8_t DATA_SIZE = 16; 
     uint8_t txData[DATA_SIZE];
     uint8_t rxData[DATA_SIZE];
     uint8_t rxSize, txSize;

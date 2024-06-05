@@ -7,6 +7,13 @@ const int8_t SPI_MISO_PIN = 12;
 const int8_t SPI_MOSI_PIN = 13;
 const int8_t SPI_SS_PIN = 15;
 
+static inline uint8_t popcount(uint8_t x) {
+    x = x - ((x >> 1) & 0x55);        // Put count of each 2 bits into those 2 bits
+    x = (x & 0x33) + ((x >> 2) & 0x33); // Put count of each 4 bits into those 4 bits
+    x = (x + (x >> 4)) & 0x0F;          // Put count of each 8 bits into those 8 bits
+    return x;                           // Total count for all bits in the byte
+}
+
 
 SpiMasterCommunication::SpiMasterCommunication(/* args */){};
 
@@ -35,7 +42,7 @@ void SpiMasterCommunication::addData(const uint8_t *data,const uint8_t size){
 }
 
 uint8_t SpiMasterCommunication::transfer(uint8_t data){
-    while(micros() - lastTransfer <= 16);
+    while(micros() - lastTransfer <= 20);
     uint8_t recData = SPI.transfer(data);
     lastTransfer = micros();
     return recData;
@@ -47,6 +54,7 @@ void SpiMasterCommunication::communication() {
     transfer(0xFF);
     // Transmission of sizes and immediate data transfer
     rxSize = transfer(txSize);
+    uint8_t nrOf1Received = popcount(rxSize);
     // Transmission of data
     uint8_t maxIterations = std::max(rxSize, txSize);
     rxSize = min(DATA_SIZE, rxSize);
@@ -55,13 +63,32 @@ void SpiMasterCommunication::communication() {
         uint8_t rxByte = transfer(txByte);
 
         if (i < rxSize) {
+            nrOf1Received += popcount(rxByte);
             rxData[i] = rxByte;  // Store received data if within rxSize
         }
     }
-    
 
+    uint8_t nrOf1 =  transfer(0x00);
+    
     // End SPI transaction
     SPI.endTransaction();
+
+   
+    //Post Processing
+    // Serial.print(rxSize);
+    // Serial.print(" ");
+    Serial.print(nrOf1Received);
+    Serial.print(" ");
+    Serial.println(nrOf1);
+    // for(uint8_t i = 0; i < rxSize; i ++){
+    //     Serial.print(rxData[i]);
+    //     Serial.print(" ");
+    // }Serial.println();
+
+    if(nrOf1 != nrOf1Received){
+        Serial.println("Problem Detected");
+        rxSize = 0;
+    }
 
     // Reset transaction size
     txSize = 0;

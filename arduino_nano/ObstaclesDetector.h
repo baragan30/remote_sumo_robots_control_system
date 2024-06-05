@@ -12,11 +12,10 @@
 //
 
 //Others Constants
-#define SPEED_OF_SOUND 340 // meter per second
-#define SG90_MILISECONDS_GRAD ((float) 1.75) //MILISECONDS PER GRAD
+
 #define MAX_X_CLOCK_SERVO ((float) 8.0)
 #define NR_MEASUREMENTS 13
-const int DEGREE_STEP = 15;
+constexpr int DEGREE_STEP = 15;
 
 
 #define MAX_ENEMY_DISTANCE 42
@@ -43,20 +42,22 @@ enum ObstaclaDetectorZone{ALL_ZONE,EXTREME_LEFT_ZONE,EXTREM_RIGHT_ZONE,FRONT_ZON
 
 class ObstaclesDetector{
 private:
+    static constexpr uint16_t SPEED_OF_SOUND = 343; //Meters per Second
     Servo myservo;
     ObstaclesDetectorState state;
     //angles at which we want to measure
     const uint8_t degree_measure[NR_MEASUREMENTS] =     {0,  15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180}; 
     //critical distance for each angle(cm)
-    const uint8_t CRITICAL_DISTANCES[NR_MEASUREMENTS] = {7,  8,  9,  11, 15, 18, 20};  
+    const  uint8_t CRITICAL_DISTANCES[NR_MEASUREMENTS] = {7,  8,  9,  11, 15, 18, 20};  
     //safety distance for each angle(cm)
-    const uint8_t SAFETY_DISTANCES[NR_MEASUREMENTS] =   {15, 20, 25, 50, 100, 130, 150};
-    int delayTime;
-    int degreeMin;
-    int degreeMax;
-    unsigned long clock;
+    const  uint8_t SAFETY_DISTANCES[NR_MEASUREMENTS] =   {15, 20, 25, 50, 100, 130, 150};
+    static constexpr uint8_t delayTime = 8;
+    uint8_t degreeMin;
+    uint8_t degreeMax;
+    unsigned long clockStart;
+
     int getIndex(uint8_t position);
-    uint8_t ultrasonicRead();
+    
 
 
 
@@ -67,10 +68,10 @@ public :
     void config();
     //set a state (Search for obstacles or for enemy)
     void setZone( ObstaclaDetectorZone zone);
-
+    uint8_t ultrasonicRead();
     //needed to call from time to time(as often as possible)
     void detect();
-    void printMeasurements();
+    void print();
 };
 
 

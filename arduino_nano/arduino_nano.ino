@@ -4,20 +4,23 @@
 #include "robot_driver.h"
 SpiSlaveConnection spiConnection;
 RobotDriver driver(spiConnection);
-HardwareTester tester;
+HardwareTester tester(spiConnection);
 
 
 void setup(){
   Serial.begin(115200);
   Serial.println("Start");
+
+
   //  tester.testMotorShortcuts();
   //  tester.testMotorAdjustTimeRotate();
   //  tester.testMotorDirections();
   //    tester.testMotorDirectionMinimumspeed();
-//   tester.testObstaclesDetector();
-  // tester.testLineDetector();
-
-    driver.config();
+//   tester.testUltrasonic();
+    //   tester.testObstaclesDetector();
+    //   tester.testLineDetector();
+    tester.testSpiSlaveConnection();
+      driver.config();
 }
 void loop()
 {

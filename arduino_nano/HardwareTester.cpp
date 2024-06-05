@@ -141,6 +141,16 @@
     }
 }
 
+[[noreturn]] void HardwareTester::testUltrasonic(){
+    obsDec.config();
+    // pinMode(4, OUTPUT);
+    // pinMode(8, INPUT);
+    while(true){
+        Serial.println(obsDec.ultrasonicRead());
+        delay(5);
+    }
+}
+
 [[noreturn]] void HardwareTester::testObstaclesDetector(){
     obsDec.config();
     long clock = millis();
@@ -152,7 +162,7 @@
             clock = millis();
             // obsDec.setZone(obs[i]);
             i = (i + 1 ) % 4;
-            obsDec.printMeasurements();
+            obsDec.print();
         }
         obsDec.detect();
     }
@@ -162,27 +172,24 @@
     lineDec.config();
     while(true){
         lineDec.read();
-        lineDec.printLine();
+        lineDec.print();
         delay(200);
     }
 }
 
-[[noreturn]] void HardwareTester::testAction(){
-    StackAction stack;
-    for(int i = 0 ; i < 20 ; i ++){
-        auto *action = new Action_Clock(100,100,i);
-        action->print();
-
-        if(!stack.push(action)){
-            delete action;
-        }
+[[noreturn]] void HardwareTester::testSpiSlaveConnection(){
+    spiConnection.init();
+    uint8_t data[SpiSlaveConnection::BUFFER_CAPACTITY];
+    uint8_t size = spiConnection.getData(data);
+    uint8_t* p = data, *end = data + size;
+    for(uint8_t *p = data; p < end; p++){
+        Serial.print(p[0]);
+        Serial.print(' ');
+    }if(size != 0){
+        Serial.println();
+    }else{
+        Serial.println("No receive");
     }
-    delay(1000);
-    while(!stack.isEmpty()){
-        Action_Clock*action;
-        stack.pop(&action);
-        action->reverse();
-        action->print();
-    }
-    while(true);
+    uint8_t measurements[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
+    spiConnection.addData(COMMAND_DISTANCE_DATA, measurements,13);
 }

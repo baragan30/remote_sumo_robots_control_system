@@ -21,8 +21,6 @@ public:
     void drive();
     void idle_drive();
     void autonomous();
-
-
 private:
     LineDetector lineDec;
     ObstaclaDetectorZone preferedZone ;

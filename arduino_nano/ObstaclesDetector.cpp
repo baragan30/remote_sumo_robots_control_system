@@ -8,10 +8,8 @@ void ObstaclesDetector::config(){
     pinMode(SONIC_TRIGG,OUTPUT);
     digitalWrite(SONIC_TRIGG, LOW);
     myservo.write(90);
-    clock = millis();
+    clockStart = millis();
     setZone(ALL_ZONE);
-    // delayTime = 2;
-    delayTime = 4;
 
 }
 
@@ -50,9 +48,11 @@ int ObstaclesDetector::getIndex(uint8_t position){
         return -1;
     return (180 -position) / DEGREE_STEP;
 }
+
 void ObstaclesDetector::detect(){
-    if (millis() < clock)  // Do Nothing
+    if (millis() - clockStart < delayTime)  // Do Nothing
         return;
+    clockStart = millis();
     uint8_t position = (uint8_t)myservo.read();
     int index = getIndex(position);
     if(index != -1){
@@ -67,7 +67,6 @@ void ObstaclesDetector::detect(){
                 state = MOVING_RIGHT;
                 myservo.write(position + 1);
             }
-            clock = millis() + delayTime;
             break;
 
         case MOVING_RIGHT:
@@ -77,14 +76,13 @@ void ObstaclesDetector::detect(){
                 state = MOVING_LEFT;
                 myservo.write(position - 1);
             }
-            clock = millis() + delayTime;
             break;
         default:
             break;
     }
 }
 
-void ObstaclesDetector::printMeasurements(){
+void ObstaclesDetector::print(){
     Serial.print(state);
     Serial.print(" ");
     Serial.print(degreeMin);
@@ -125,13 +123,13 @@ void ObstaclesDetector::printMeasurements(){
  */
 uint8_t ObstaclesDetector::ultrasonicRead() {
     digitalWrite(SONIC_TRIGG, HIGH);
+    // Wait 10 microseconds
     unsigned int clock = micros();
     while(micros() - clock <= 10);
     digitalWrite(SONIC_TRIGG, LOW);
-
     noInterrupts();
-    long duration = pulseIn(SONIC_ECHO, HIGH,20000);//miliseconds
+    unsigned long duration = pulseIn(SONIC_ECHO, HIGH);
     interrupts();
-    uint8_t distance = min((duration * SPEED_OF_SOUND / 20000) ,255);
+    uint8_t distance = min((duration*SPEED_OF_SOUND)/20000,0xFF);
     return distance;
 }
