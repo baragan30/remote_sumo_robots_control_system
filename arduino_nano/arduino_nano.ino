@@ -11,15 +11,17 @@ void setup(){
   Serial.begin(115200);
   Serial.println("Start");
 
-
+  //  tester.testMotorDirectionMinimumspeed();
   //  tester.testMotorShortcuts();
   //  tester.testMotorAdjustTimeRotate();
   //  tester.testMotorDirections();
-  //    tester.testMotorDirectionMinimumspeed();
-//   tester.testUltrasonic();
-    //   tester.testObstaclesDetector();
-    //   tester.testLineDetector();
-    tester.testSpiSlaveConnection();
+  
+  // tester.testUltrasonic();
+  // tester.testServo();
+    // tester.testObstaclesDetector();
+      
+      // tester.testLineDetector();
+    // tester.testSpiSlaveConnection();
       driver.config();
 }
 void loop()

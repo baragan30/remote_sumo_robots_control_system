@@ -17,10 +17,15 @@ public:
 
 private:
     static const char ssl_cert[] PROGMEM;
-    static const char ssid[] PROGMEM; 
-    static const char password[] PROGMEM; 
-    static const char websockets_connection_string[] PROGMEM;
+    static const char SSID1[] PROGMEM;
+    static const char PASSWORD1[] PROGMEM;
+    static const char SSID2[] PROGMEM;
+    static const char PASSWORD2[] PROGMEM;
+    static const uint8_t STATIC_IP PROGMEM;
+
     unsigned long waitClockMs;
+    String url;
+    uint8_t wifi_no  = 2;
 
 };
 

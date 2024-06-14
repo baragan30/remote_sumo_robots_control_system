@@ -3,21 +3,21 @@
 //
 #include <Arduino.h>
 #include "Actions.h"
-Action_Clock::Action_Clock(unsigned long  durationMs, int8_t speedLeft, int8_t speedRight) {
+ActionClock::ActionClock(unsigned long  durationMs, int8_t speedLeft, int8_t speedRight) {
     this->speedRight = speedRight;
     this->speedLeft = speedLeft;
     this->durationMs = durationMs;
     this->clockStart = millis();
 }
 
-bool Action_Clock::isDone() {
+bool ActionClock::isDone() {
     return millis() - clockStart >= durationMs;
 }
-bool Action_Clock::isUnfolding()  {
+bool ActionClock::isUnfolding()  {
     return !isDone();
 }
 
-void Action_Clock::print() {
+void ActionClock::print() {
     Serial.print("d = ");
     Serial.print(speedRight);
     Serial.print(" s = ");

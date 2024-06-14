@@ -15,22 +15,33 @@ ServerConnection::ServerConnection()
 
 bool ServerConnection::connect() {
     if(WiFi.status() != WL_CONNECTED){
-        if(millis() - waitClockMs > 3000){
-            Serial.println("Try connecting to Wifi");
-            WiFi.mode(WIFI_STA);
-            WiFi.begin(this->ssid, this->password);
-            waitClockMs = millis();
+        if(this->wifi_no == 1){
+            Serial.print("Try connecting to Wifi: ");
+            Serial.println(this->SSID1);
+            WiFi.begin(this->SSID1, this->PASSWORD1);
+        }else if(this->wifi_no == 2){
+            Serial.print("Try connecting to Wifi: ");
+            Serial.println(this->SSID2);
+            WiFi.begin(this->SSID2, this->PASSWORD2);
+        }else {
+            this->wifi_no = 1;
         }
-        return false;
+        unsigned long startAttemptTime = millis();
+        const unsigned long connectionTimeout = 1500; // 1.5 seconds
+        while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < connectionTimeout);
+        if(WiFi.status() == WL_CONNECTED){
+            IPAddress localIP = WiFi.localIP();
+            IPAddress serverIp(localIP[0], localIP[1], localIP[2], this->STATIC_IP);
+            this->url = "ws://" + serverIp.toString() + ":5000/connect/robot";
+        }else {
+            this->wifi_no = (this->wifi_no) % 2 + 1;
+            return false;
+        }
     }
 
     if(!this->available()){
-        if(millis() - waitClockMs > 2000){
-            waitClockMs = millis();
-            Serial.println("Try connecting to server");
-            this->setCACert(ssl_cert);
-            Serial.println( WebsocketsClient::connect(this->websockets_connection_string));
-        }
+        Serial.println("Try connecting to " + this->url);
+        WebsocketsClient::connect(this->url);
         return false;
     }
     return true;
@@ -57,7 +68,7 @@ bool ServerConnection::sendBinary(const char* data, const size_t len){
 }
 
 bool ServerConnection::loop(){
-    if(!this->ping()){
+    if(!ping()){
         if(!this->connect())
             return false;
     }
@@ -98,22 +109,11 @@ const char ServerConnection::ssl_cert[] PROGMEM = \
   "Dfvp7OOGAN6dEOM4+qR9sdjoSYKEBpsr6GtPAQw4dy753ec5\n" \
   "-----END CERTIFICATE-----\n";
 
+const uint8_t ServerConnection::STATIC_IP PROGMEM = 136;
 
-#ifdef CLUJ_WIFI
-const char ServerConnection::ssid[] PROGMEM = "Faster-Faster";
-const char ServerConnection::password[] PROGMEM = "voidmain()";
-// const char ServerConnection::websockets_connection_string[] PROGMEM = "wss://server-m5viojw2ba-lm.a.run.app/connect/robot";
-const char ServerConnection::websockets_connection_string[] PROGMEM = "ws://192.168.1.136:5000/connect/robot";
-#elif defined(PHONE_WIFI)
-const char ServerConnection::ssid[] PROGMEM = "BRG";
-const char ServerConnection::password[] PROGMEM = "brgbrgbrg3";
-const char ServerConnection::websockets_connection_string[] PROGMEM = "ws://192.168.58.41:5000/connect/robot";
-#elif defined(TURCENI_WIFI)
-const char ServerConnection::ssid[] PROGMEM = "DIGI_ea72ea";
-const char ServerConnection::password[] PROGMEM = "5de30098";
-const char ServerConnection::websockets_connection_string[] PROGMEM = "ws://192.168.1.4:5000/connect/robot";
-#else
-const char ServerConnection::ssid[] PROGMEM = "BRG-PC";
-const char ServerConnection::password[] PROGMEM = "brgbrgbrg3";
-const char ServerConnection::websockets_connection_string[] PROGMEM = "ws://192.168.137.1:5000/connect/robot";
-#endif
+const char ServerConnection::SSID1[] PROGMEM = "Faster-Faster";
+const char ServerConnection::PASSWORD1[] PROGMEM = "voidmain()";
+
+const char ServerConnection::SSID2[] PROGMEM = "BRG";
+const char ServerConnection::PASSWORD2[] PROGMEM = "brgbrgbrg3";
+

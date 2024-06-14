@@ -8,13 +8,16 @@ class RobotController{
       this.handleLostConnection.bind(this)
     );
 
+    this.selectStrategyPad = new SelectStrategyPad();
     this.leftButton  = new ContinuousActionButton('leftButton', 'a', this.handleUserInput.bind(this));
     this.rightButton = new ContinuousActionButton('rightButton','d', this.handleUserInput.bind(this));
     this.frontButton = new ContinuousActionButton('forwardButton','w', this.handleUserInput.bind(this));
     this.backButton  = new ContinuousActionButton('backwardButton','s', this.handleUserInput.bind(this));
     this.videoStreamCommandButton  = new ContinuousActionButton('','q', this.handleUserInput.bind(this),1000);
+    this.startStrategyButton  = new ContinuousActionButton('startStrategyButton',' ', this.handleUserInput.bind(this),1000);
 
     this.uiController = new UiController()
+    this.hasIdleState = true;
   }
 
   disconnect(){

@@ -8,6 +8,7 @@ enum Commands{
     COMMAND_REGISTER = 0x00,
     COMMAND_LINK = 0x01,
     COMMAND_CONNECTION = 0x02,
+    COMMAND_STRATEGY = 0x03,
     COMMAND_VIDEO_STREAMING = 0x04,
     COMMAND_FRAME = 0x05,
     COMMAND_MOTOR_POWER =0x06,
@@ -86,21 +87,20 @@ public:
     SpiSlaveConnection(/* args */);
     void init();
     void addData(const uint8_t command, const uint8_t data);
-    void addData(const uint8_t command, const uint8_t data[],const uint8_t dataSize);
+    void addData(const uint8_t command, const uint8_t data[]);
     uint8_t getData(uint8_t data[]);
     void interrupt();
 private:
-    CommitQueue<BUFFER_CAPACTITY> txQueue, rxQueue;
-    volatile uint8_t bytes_to_transmit, bytes_to_receive, nrof1Transmittted;
+    CommitQueue<BUFFER_CAPACTITY> rxQueue;
+    uint8_t txData[BUFFER_CAPACTITY];
+    volatile uint8_t txByteIndex, bytes_to_receive, nrof1Transmitted;
     // Define the TransmissionState enum
     volatile enum TransmissionState {
         IDLE,           // Waiting for command or data
-        NO_BYTES,
+        BYTES_TO_RECEIVE,
         RECEIVING,      // Currently receiving data
         NR_OF_1,
     } state; 
-
-    void commit();
 };
 
 

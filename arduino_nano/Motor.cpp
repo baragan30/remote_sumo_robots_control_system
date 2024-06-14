@@ -12,12 +12,6 @@ void Motor::config(){
    pinMode (rightP1_PWM, OUTPUT);
 }
 
-/*
- * Transform a number between 0 and PMAX in a number between POW_MIN and POWMAX
- * transposesSpeed(0) = 0
- * transposesSpeed(1) ~= POW_MIN
- * transposesSpeed(PMAX) = POW_MAX
- */
 
 void Motor::stop(){
   move(0,0);
@@ -36,30 +30,30 @@ void Motor::forceRight(){
 }
 
 void Motor::left(){
-    move(1,100);
+    move(5,100);
 }
 void Motor::right(){
-    move(60,100);
-}
-void Motor::slowLeft(){
-    move(10,100);
-}
-void Motor::slowRight(){
-    move(58,100);
+    move(100,5);
 }
 
 
-
+/*
+ * Transform a number between 0 and PMAX in a number between POW_MIN and POWMAX
+ * transposesSpeed(0) = 0
+ * transposesSpeed(1) = POW_MIN
+ * transposesSpeed(PMAX) = POW_MAX
+ */
 uint8_t Motor::speedToPower(int8_t speed){
   if (speed == 0) 
     return 0;
-  speed = min(SPEED_MAX, abs(SPEED_MAX));
-  return POW_MIN + speed*(POW_MAX - POW_MIN)/ SPEED_MAX;
+  speed = min(abs(speed), SPEED_MAX);
+  return POW_MIN + (speed - 1) *(POW_MAX - POW_MIN)/ (SPEED_MAX - 1);
 }
 
 void Motor::move(int8_t leftPower, int8_t rightPower){
-  moveWheel(rightPower,rightP0_DIGITAL, rightP1_PWM);
   moveWheel(leftPower,leftP0_DIGITAL, leftP1_PWM);
+  moveWheel(rightPower,rightP0_DIGITAL, rightP1_PWM);
+  
 }
 void Motor::moveWheel(int8_t speed,int P0_DIGITAL, int P1_PWM){
   uint8_t power = speedToPower(speed);

@@ -7,8 +7,9 @@ void ObstaclesDetector::config(){
     pinMode(SONIC_ECHO,INPUT);
     pinMode(SONIC_TRIGG,OUTPUT);
     digitalWrite(SONIC_TRIGG, LOW);
-    myservo.write(90);
+    move(90);
     clockStart = millis();
+    compute_enemy_position();
     setZone(ALL_ZONE);
 
 }
@@ -37,7 +38,7 @@ void ObstaclesDetector::setZone(ObstaclaDetectorZone zone){
             break;
     }
     for(int i = 0 ; i < NR_MEASUREMENTS; i ++){
-        if (degree_measure[i] < degreeMin && degree_measure[i] > degreeMax){
+        if ( degree_measure[i] < degreeMin  || degree_measure[i] > degreeMax){
             measurements[i] = 0;
         }
     }
@@ -46,35 +47,67 @@ void ObstaclesDetector::setZone(ObstaclaDetectorZone zone){
 int ObstaclesDetector::getIndex(uint8_t position){
     if(position % DEGREE_STEP != 0)
         return -1;
-    return (180 -position) / DEGREE_STEP;
+    return position / DEGREE_STEP;
+}
+
+void ObstaclesDetector::compute_enemy_position(){
+    uint8_t minDistance = 0xff, minIndex = -1;
+    for(int i = 0 ; i < NR_MEASUREMENTS; i ++){
+        if(measurements[i] != 0 && measurements[i] < minDistance){
+            minDistance = measurements[i];
+            minIndex = i;
+        }
+    }
+
+    if(minIndex == -1 || minDistance > 50){
+        setZone(ALL_ZONE);
+        enemyPosition = -1;
+        enemyDistance = 0;//unknown
+    }else {
+        //minDistance <= 50, minindex != -1
+        enemyPosition = degree_measure[minIndex];
+        enemyDistance = minDistance;
+        if(minDistance > 20){
+            setZone(ALL_ZONE);
+        }else {
+            if(enemyPosition >= 150){
+                setZone(EXTREME_LEFT_ZONE);
+            }else if(enemyPosition <= 30){
+                setZone(EXTREM_RIGHT_ZONE);
+            }else{
+                setZone(FRONT_ZONE);
+            }
+        }
+    }
 }
 
 void ObstaclesDetector::detect(){
-    if (millis() - clockStart < delayTime)  // Do Nothing
+    if (millis() - clockStart < DELAY_SERVO_TIME)  // Do Nothing
         return;
     clockStart = millis();
-    uint8_t position = (uint8_t)myservo.read();
+    uint8_t position = getServoPosition();
     int index = getIndex(position);
     if(index != -1){
         measurements[index] = ultrasonicRead();
     }
+    compute_enemy_position();
     switch (state) {
         case IDLE:      //SCAN
         case MOVING_LEFT:
             if(position > degreeMin)
-                myservo.write(position - 1);
+                move(position - 1);
             else{
                 state = MOVING_RIGHT;
-                myservo.write(position + 1);
+                move(position + 1);
             }
             break;
 
         case MOVING_RIGHT:
             if(position < degreeMax)
-                myservo.write(position + 1);
+                move(position + 1);
             else{
                 state = MOVING_LEFT;
-                myservo.write(position - 1);
+                move(position - 1);
             }
             break;
         default:
@@ -82,13 +115,22 @@ void ObstaclesDetector::detect(){
     }
 }
 
+uint8_t ObstaclesDetector::getServoPosition(){
+    return (uint8_t)myservo.read();
+}
+
+void ObstaclesDetector::move(uint8_t degree){
+    myservo.write(degree);
+}
+
 void ObstaclesDetector::print(){
-    Serial.print(state);
+    Serial.print(enemyPosition);
     Serial.print(" ");
+    Serial.println(enemyDistance);
     Serial.print(degreeMin);
-    Serial.print(" ");
+    Serial.print(" <-> ");
     Serial.println(degreeMax);
-    for(int i = 0 ; i < NR_MEASUREMENTS; i ++){
+    for(int i = NR_MEASUREMENTS -1 ; i >= 0; i --){
         Serial.print(degree_measure[i]);
         if (degree_measure[i] < 10)
             Serial.print("   ");
@@ -98,7 +140,7 @@ void ObstaclesDetector::print(){
             Serial.print(" ");
     }
     Serial.println();
-    for(int i = 0 ; i < NR_MEASUREMENTS; i ++){
+    for(int i = NR_MEASUREMENTS -1 ; i >= 0; i--){
         Serial.print((int)measurements[i]);
         if (measurements[i] < 10)
             Serial.print("   ");
@@ -127,9 +169,9 @@ uint8_t ObstaclesDetector::ultrasonicRead() {
     unsigned int clock = micros();
     while(micros() - clock <= 10);
     digitalWrite(SONIC_TRIGG, LOW);
-    noInterrupts();
-    unsigned long duration = pulseIn(SONIC_ECHO, HIGH);
-    interrupts();
+    // noInterrupts();
+    unsigned long duration = pulseIn(SONIC_ECHO, HIGH, 12000);
+    // interrupts();
     uint8_t distance = min((duration*SPEED_OF_SOUND)/20000,0xFF);
     return distance;
 }

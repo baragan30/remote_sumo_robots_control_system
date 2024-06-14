@@ -30,6 +30,7 @@ public:
     [[noreturn]] void testMotorMinimumSpeedBackwardForward();
 
     [[noreturn]] void testObstaclesDetector();
+    [[noreturn]] void testServo();
 
     [[noreturn]] void testUltrasonic();
 

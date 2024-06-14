@@ -25,8 +25,8 @@
 [[noreturn]] void HardwareTester::testMotorShortcuts(){
     Motor motor;
     motor.config();
-    int d = 3000;
-    int d2 = 1000;
+    int d = 250;
+    int d2 = 2000;
     while(true){
 
         motor.forward();
@@ -45,6 +45,16 @@
         delay(d2);
 
         motor.forceLeft();
+        delay(d);
+        motor.stop();
+        delay(d2);
+
+        motor.right();
+        delay(d);
+        motor.stop();
+        delay(d2);
+
+        motor.left();
         delay(d);
         motor.stop();
         delay(d2);
@@ -109,21 +119,28 @@
 
 [[noreturn]] void HardwareTester::testMotorDirectionMinimumspeed(){
     motor.config();
+    int d = 250;
+    int d2 = 2000;
     while(true){
-        for (int direction = -100 ; direction <= 100; direction+=10){
-            motor.move(direction,1);
-            Serial.println(direction);
-            delay(1000);
-            motor.stop();
-            delay(500);
-        }
-        for (int direction = 100 ; direction >= -100; direction-=10){
-            motor.move(direction,1);
-            Serial.println(direction);
-            delay(1000);
-            motor.stop();
-            delay(500);
-        }
+        motor.move(1,1);
+        delay(d);
+        motor.stop();
+        delay(d2);
+
+        motor.move(-1,-1);
+        delay(d);
+        motor.stop();
+        delay(d2);
+
+        motor.move(-1,1);
+        delay(d);
+        motor.stop();
+        delay(d2);
+
+         motor.move(1,-1);
+        delay(d);
+        motor.stop();
+        delay(d2);
     }
 }
 
@@ -143,11 +160,28 @@
 
 [[noreturn]] void HardwareTester::testUltrasonic(){
     obsDec.config();
-    // pinMode(4, OUTPUT);
-    // pinMode(8, INPUT);
     while(true){
-        Serial.println(obsDec.ultrasonicRead());
-        delay(5);
+        unsigned long clock = micros();
+        Serial.print(obsDec.ultrasonicRead());
+        Serial.print(" ");
+        Serial.println(micros() - clock);
+        delay(10);
+    }
+}
+[[noreturn]] void HardwareTester::testServo(){
+    obsDec.config();
+
+    while(true){
+        for(int i = 0 ; i <= 180 ; i += 2){
+            obsDec.move(i);
+            Serial.println(i);
+            delay(3);
+        }
+        delay(1000);
+        obsDec.move(90);
+        delay(1000);
+        obsDec.move(0);
+        delay(1000);
     }
 }
 
@@ -155,14 +189,10 @@
     obsDec.config();
     long clock = millis();
     int i = 0 ;
-    ObstaclaDetectorZone obs[4] = {ALL_ZONE,FRONT_ZONE,EXTREME_LEFT_ZONE,EXTREM_RIGHT_ZONE};
-    obsDec.setZone(ALL_ZONE);
     while(true){
         if(millis() - clock  > 1000){
-            clock = millis();
-            // obsDec.setZone(obs[i]);
-            i = (i + 1 ) % 4;
             obsDec.print();
+            clock = millis();
         }
         obsDec.detect();
     }
@@ -191,5 +221,6 @@
         Serial.println("No receive");
     }
     uint8_t measurements[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
-    spiConnection.addData(COMMAND_DISTANCE_DATA, measurements,13);
+    spiConnection.addData(COMMAND_DISTANCE_DATA, measurements);
+    spiConnection.addData(COMMAND_RING_EDGE_DATA,14);
 }

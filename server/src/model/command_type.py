@@ -4,6 +4,7 @@ class CommandType(Enum):
     REGISTER = 0x00
     LINK = 0x01
     CONNECTION = 0x02
+    STRATEGY = 0x03
     VIDEO_STREAM = 0x04
     FRAME = 0x05
     MOTOR_POWER = 0x06

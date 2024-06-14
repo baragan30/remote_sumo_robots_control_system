@@ -1,4 +1,6 @@
+import threading
 import uuid;
+import socket
 from flask import Flask, render_template,jsonify
 from flask_sock import Sock
 from src.connections.robot_connection import RobotConnection
@@ -37,3 +39,7 @@ def joystick(robotId=None):
 @app.route('/')
 def homePage():
     return render_template('index.html')
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

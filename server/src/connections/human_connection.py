@@ -16,6 +16,7 @@ class HumanConnection(Connection):
         super().set_command_handlers()
         self.command_handlers[CommandType.VIDEO_STREAM] = self.handle_retransmit
         self.command_handlers[CommandType.MOTOR_POWER] = self.handle_retransmit
+        self.command_handlers[CommandType.STRATEGY] = self.handle_retransmit
 
     def handle_retransmit(self, command:bytes) -> None:
         self.user.send_message_to_linked_user(command)

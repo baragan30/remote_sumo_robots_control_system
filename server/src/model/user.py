@@ -8,12 +8,15 @@ class User:
         self.uid:UUID = uuid.uuid4()
         self.linkedUser :User = None
         self.connected:bool = False
-        self.__messages:Queue[bytes] = Queue(maxsize=1)
+        self.__messages:Queue[bytes] = Queue(maxsize=3)
         
     def send_message(self, message:bytes) -> None:
         if self.__messages.full():
             self.get_next_message()
         self.__messages.put_nowait(message)
+
+    def hasLinkedUserConnected(self) -> bool:
+        return self.linkedUser and self.linkedUser.connected
     
     def send_message_to_linked_user(self, message:bytes) -> None:
         if(self.linkedUser):

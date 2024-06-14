@@ -11,15 +11,15 @@ enum Action {
     NONE_ACTION,MOVING_FORWARD,MOVING_BACKWARD,MOVING_SIDE,STOP_ACTION};
 
 //handle an Action (duration timne start , time end)
-class Action_Clock{
+class ActionClock{
 private:
     unsigned long durationMs;
     unsigned long clockStart;
 public:
     int8_t speedLeft;
     int8_t speedRight;
-    Action_Clock(unsigned long durationMs,int8_t speedLeft, int8_t speedRight);
-    Action_Clock(){};
+    ActionClock(unsigned long durationMs,int8_t speedLeft, int8_t speedRight);
+    ActionClock(){};
     bool isDone();
     bool isUnfolding();
     void print();

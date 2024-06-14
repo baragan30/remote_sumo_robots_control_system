@@ -6,8 +6,8 @@
 //After this number of direction the oposite motor it stats moving backward (see move function)
 #define SPEED_MAX 100  // procent maxim (see move function)
 
-#define POW_MIN 50  
-#define POW_MAX 150
+#define POW_MIN 80  
+#define POW_MAX 255
 
 class Motor{
   private :
@@ -26,8 +26,6 @@ class Motor{
     void backward();
     void forceLeft();
     void forceRight();
-    void slowLeft();
-    void slowRight();
     void left();
     void right();
     /*

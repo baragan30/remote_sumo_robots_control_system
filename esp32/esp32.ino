@@ -1,3 +1,5 @@
+
+
 #include "server_connection.h"
 #include "spi_master_communication.h"
 #include "esp_camera.h"
@@ -19,7 +21,7 @@ bool authentificatedWithUID = false;
 bool transmitVideStreaming = true;
 
 
-static const uint8_t MAX_LOOP_DURATIONS = 30;  // Defines the number of loop durations to store
+static const uint8_t MAX_LOOP_DURATIONS = 10;  // Defines the number of loop durations to store
 uint8_t currentDurationIndex = 0;              // Index to keep track of the current loop duration entry
 uint32_t loopDurations[MAX_LOOP_DURATIONS];
 uint32_t totalLoopDuration;
@@ -28,6 +30,7 @@ enum Commands{
     COMMAND_REGISTER = 0x00,
     COMMAND_LINK = 0x01,
     COMMAND_CONNECTION = 0x02,
+    COMMAND_STRATEGY = 0x03,
     COMMAND_VIDEO_STREAMING = 0x04,
     COMMAND_FRAME = 0x05,
     COMMAND_MOTOR_POWER =0x06,
@@ -55,25 +58,15 @@ void onMessageCallback(WebsocketsMessage message) {
             authentificatedWithUID = true;
             spiCommunication.addData(COMMAND_CONNECTION, 0x01);
         break;
-        case COMMAND_LINK:
-        break;
-        case COMMAND_CONNECTION:
+        case COMMAND_STRATEGY:
+            spiCommunication.addData(s, 2);
         break;
         case COMMAND_VIDEO_STREAMING:
             transmitVideStreaming = (bool) s[1];
         break;
-        case COMMAND_FRAME:
-        break;
         case COMMAND_MOTOR_POWER:
-            Serial.print(s[0]);
-            Serial.print(" ");
-            Serial.print(s[1]);
-            Serial.print(" ");
-            Serial.print(s[2]);
-            Serial.println(" ");
             spiCommunication.addData(s, 3);
         break;
-
         default:
         break;
     }
@@ -115,8 +108,8 @@ void initCamera(){
     config.pixel_format = PIXFORMAT_JPEG;
     config.grab_mode = CAMERA_GRAB_LATEST;
     config.frame_size = FRAMESIZE_QVGA; //FRAMESIZE_96X96; //FRAMESIZE_QQVGA; //FRAMESIZE_SVGA;
-    config.jpeg_quality = 25;
-    config.fb_count = 1;
+    config.jpeg_quality = 16;
+    config.fb_count = 2;
     config.fb_location = CAMERA_FB_IN_DRAM;
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK) {
@@ -134,7 +127,6 @@ void setup() {
     Serial.println("Programmed started");
     serverConnection.onMessage(onMessageCallback);
     serverConnection.onEvent(onEventsCallback);
-    serverConnection.connect();
     initCamera();
     spiCommunication.init();
     for(int i = 0; i < MAX_LOOP_DURATIONS; i++){
@@ -151,39 +143,39 @@ void transmitSensorsData(){
     const uint8_t *end = p + size;
     
 
-    bool corect = true;
-    for(uint8_t  i = 1; i < 8; i ++){
-        if(p[i] != i){
-          corect = false;
-          break;
-        }
-    }
-    if(!corect && size > 0){
-      Serial.println("size = ");
-      Serial.println(size);
-       for(uint8_t * i = p; i < end; i ++){
-          Serial.print(i[0]);
-          Serial.print(" ");
-      }Serial.println();
-    }
-   
-
-    // while(p < end){
-
-    //     switch(p[0]){
-    //         case COMMAND_DISTANCE_DATA:
-    //             serverConnection.sendBinary((const char *)p, 14);
-    //             p+=14;
-    //         break;
-    //         case COMMAND_RING_EDGE_DATA:
-    //             serverConnection.sendBinary((const char *)p, 2);
-    //             p+=2;
-    //         break;
-    //         default:
-    //             p++;
-    //         break;
+    // bool corect = true;
+    // for(uint8_t  i = 1; i < 8; i ++){
+    //     if(p[i] != i){
+    //       corect = false;
+    //       break;
     //     }
     // }
+    // if(!corect && size > 0){
+    //   Serial.print("size = ");
+    //   Serial.println(size);
+    //    for(uint8_t * i = p; i < end; i ++){
+    //       Serial.print(i[0]);
+    //       Serial.print(" ");
+    //   }Serial.println();
+    // }
+   
+
+    while(p < end){
+
+        switch(p[0]){
+            case COMMAND_DISTANCE_DATA:
+                serverConnection.sendBinary((const char *)p, 14);
+                p+=14;
+            break;
+            case COMMAND_RING_EDGE_DATA:
+                serverConnection.sendBinary((const char *)p, 2);
+                p+=2;
+            break;
+            default:
+                p++;
+            break;
+        }
+    }
 }
 
 
@@ -201,40 +193,40 @@ void loop() {
     //Eschange information with arduino nano
     spiCommunication.communication();
 
-    // //Check and restablish internet connection
-    // if(!serverConnection.loop() ){
-    //     spiCommunication.addData(COMMAND_CONNECTION, 0x00);
-    //     return;
-    // }
+    //Check and restablish internet connection
+    if(!serverConnection.loop() ){
+        spiCommunication.addData(COMMAND_CONNECTION, 0x00);
+        Serial.println("aici1");
+        return;
+    }
 
-    // //Authentificating to Server
-    // if(!authentificatedWithUID){
-    //     if(millis()- lastLoginClock > 500 ){
-    //        Serial.println("Try Login...");
-    //        try_login();
-    //        lastLoginClock = millis();
-    //     }
-    //     spiCommunication.addData(COMMAND_CONNECTION, 0x00);
-    //     return;
-    // }
+    // Authentificating to Server
+    if(!authentificatedWithUID){
+        if(millis()- lastLoginClock > 500 ){
+           Serial.println("Try Login...");
+           try_login();
+           lastLoginClock = millis();
+        }
+        spiCommunication.addData(COMMAND_CONNECTION, 0x00);
+        Serial.println("aici2");
+        return;
+    }
 
     //transmit Data getted from sensors
     transmitSensorsData();
 
-    // // Transmit Video Freame
-    // if(transmitVideStreaming &&  loopsPerSecond() > 20){
-    //     camera_fb_t * fb = NULL;
-    //     fb = esp_camera_fb_get();
-    //     serverConnection.sendBinary(COMMAND_FRAME,(const char *)fb->buf, fb->len);
-    //     esp_camera_fb_return(fb);
-    // }
-    // ! Delete this
-    delay(10);
+    // Transmit Video Freame
+    if(transmitVideStreaming &&  loopsPerSecond() > 20){
+        camera_fb_t * fb = NULL;
+        fb = esp_camera_fb_get();
+        serverConnection.sendBinary(COMMAND_FRAME,(const char *)fb->buf, fb->len);
+        esp_camera_fb_return(fb);
+    }
 
     uint32_t newLoopDuration = micros() - startLoopTime;
     totalLoopDuration = totalLoopDuration + newLoopDuration - loopDurations[currentDurationIndex];
     loopDurations[currentDurationIndex] = newLoopDuration;
     currentDurationIndex = (currentDurationIndex + 1) % MAX_LOOP_DURATIONS;
-    // Serial.print("Loops per second ");
-    // Serial.println(loopsPerSecond());
+    Serial.print("Loops/s : ");
+    Serial.println(loopsPerSecond());
 }

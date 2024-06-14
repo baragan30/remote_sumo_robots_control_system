@@ -37,31 +37,31 @@ class EnemyDistanceIndicator{
       this.enemyDetectors[4].style.backgroundColor = 'gray';
       this.enemyDetectors[0].innerText = '';
       return;
-    }else if (distance < 10){
+    }else if (distance <= 7){
       this.enemyDetectors[0].style.backgroundColor = 'red';
       this.enemyDetectors[1].style.backgroundColor = 'red';
       this.enemyDetectors[2].style.backgroundColor = 'red';
       this.enemyDetectors[3].style.backgroundColor = 'red';
       this.enemyDetectors[4].style.backgroundColor = 'red';
-    }else if(distance < 40){
+    }else if(distance <= 15){
       this.enemyDetectors[0].style.backgroundColor = 'green';
       this.enemyDetectors[1].style.backgroundColor = 'red';
       this.enemyDetectors[2].style.backgroundColor = 'red';
       this.enemyDetectors[3].style.backgroundColor = 'red';
       this.enemyDetectors[4].style.backgroundColor = 'red';
-    }else if(distance < 80){
+    }else if(distance <= 25){
       this.enemyDetectors[0].style.backgroundColor = 'green';
       this.enemyDetectors[1].style.backgroundColor = 'green';
       this.enemyDetectors[2].style.backgroundColor = 'red';
       this.enemyDetectors[3].style.backgroundColor = 'red';
       this.enemyDetectors[4].style.backgroundColor = 'red';
-    }else if(distance < 120){
+    }else if(distance <= 50){
       this.enemyDetectors[0].style.backgroundColor = 'green';
       this.enemyDetectors[1].style.backgroundColor = 'green';
       this.enemyDetectors[2].style.backgroundColor = 'green';
       this.enemyDetectors[3].style.backgroundColor = 'red';
       this.enemyDetectors[4].style.backgroundColor = 'red';
-    }else if(distance < 180){
+    }else if(distance <= 100){
       this.enemyDetectors[0].style.backgroundColor = 'green';
       this.enemyDetectors[1].style.backgroundColor = 'green';
       this.enemyDetectors[2].style.backgroundColor = 'green';
@@ -125,6 +125,31 @@ class CavasController{
   }
 }
 
+class SelectStrategyPad{
+  constructor(){
+    this.startButton = document.getElementById("startStrategyButton");
+    this.select = document.getElementById("selectStrategy");
+    this.setStartButton();
+  }
+
+  setStopButton(){
+    this.select.style.display = 'none';
+    this.startButton.style.backgroundColor = 'red';
+    this.startButton.innerText = "Stop";
+  }
+  setStartButton(){
+    this.select.style.display = 'block'; 
+    this.startButton.style.backgroundColor = 'green';
+    this.startButton.innerText = "Start";
+  }
+  setSelectValue(value) {
+    this.select.value = value;
+  }
+  getSelectValue() {
+    return this.select.value;
+  }
+}
+
 class UiController{
     constructor(){
       this.canvasController = new CavasController('imageCanvas')
@@ -163,6 +188,7 @@ class UiController{
     displayFullConnection(){
       this.displayText("Connected to Robot");
     }
+    
     displayNone(){
       this.displayText("");
     }
@@ -178,7 +204,7 @@ class UiController{
     displayDistanceData(distance_dataBytes){
       for (let i = 0; i < this.enemyDetectors.length; i++) {
         let distance = distance_dataBytes[i] || 0;
-        this.enemyDetectors[i].setDistance(distance);
+        this.enemyDetectors[this.enemyDetectors.length -1-i].setDistance(distance);
       }
     }
     drawRingData(data_Bytes){

@@ -78,16 +78,16 @@ void SpiMasterCommunication::communication() {
     //Post Processing
     // Serial.print(rxSize);
     // Serial.print(" ");
-    Serial.print(nrOf1Received);
-    Serial.print(" ");
-    Serial.println(nrOf1);
+    // Serial.print(nrOf1Received);
+    // Serial.print(" ");
+    // Serial.println(nrOf1);
     // for(uint8_t i = 0; i < rxSize; i ++){
     //     Serial.print(rxData[i]);
     //     Serial.print(" ");
     // }Serial.println();
 
     if(nrOf1 != nrOf1Received){
-        Serial.println("Problem Detected");
+        Serial.println("SPI Error Detected");
         rxSize = 0;
     }
 
