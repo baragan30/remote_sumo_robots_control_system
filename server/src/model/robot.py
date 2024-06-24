@@ -1,7 +1,7 @@
 from typing import Optional
 from src.model.robot_sensors_data import RobotControlData, RobotSensorsData
 from src.model.user import User
-from src.strategies.strategy import Strategy
+from strategies.strategies import Strategy
 
 
 class Robot(User):

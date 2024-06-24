@@ -1,5 +1,5 @@
 from typing import Optional
-
+import struct
 
 class RobotSensorsData:
     def __init__(self) -> None:
@@ -42,3 +42,11 @@ class RobotControlData:
     @motorPowers.setter
     def motorPowers(self, value: bytes) -> None:
         self._motorPowers = value
+
+    @staticmethod
+    def from_powers(powerLeft: int, powerRight: int) -> 'RobotControlData':
+        # Create a new instance of RobotControlData
+        robotData = RobotControlData()
+        # Pack powerLeft and powerRight as signed bytes and assign them to motorPowers
+        robotData.motorPowers = bytearray(struct.pack('bb', powerLeft, powerRight))
+        return robotData

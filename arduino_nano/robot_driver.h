@@ -10,7 +10,6 @@
 enum ROBOT_DRIVER_STATE{
     ROBOT_DRIVER_IDLE_STATE = 0x00,
     ROBOT_DRIVER_REMOTE_CONTROL_STATE = 0x01,
-    ROBOT_DRIVER_REMOTE_WAIT_STATE = 0x01,
     ROBOT_DRIVER_AUTONOMOUS_STATE = 0x02,
 };
 class RobotDriver
@@ -31,7 +30,7 @@ private:
     ActionClock action1, action2;
     unsigned long lastTransmissionClock = millis();
 
-    static const unsigned long turn360around = 1500;
+    static const unsigned long turn360around = 1000;
     static const unsigned long turn180around = turn360around/2;
     static const unsigned long turn165around = turn360around*11/24;
     static const unsigned long turn150around = turn360around/2;

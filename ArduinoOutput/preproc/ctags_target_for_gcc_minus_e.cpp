@@ -201,7 +201,6 @@ void loop() {
     //Check and restablish internet connection
     if(!serverConnection.loop() ){
         spiCommunication.addData(COMMAND_CONNECTION, 0x00);
-        Serial.println("aici1");
         return;
     }
 
@@ -213,7 +212,6 @@ void loop() {
            lastLoginClock = millis();
         }
         spiCommunication.addData(COMMAND_CONNECTION, 0x00);
-        Serial.println("aici2");
         return;
     }
 
@@ -223,9 +221,9 @@ void loop() {
     // Transmit Video Freame
     if(transmitVideStreaming && loopsPerSecond() > 20){
         camera_fb_t * fb = 
-# 220 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino" 3 4
+# 218 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino" 3 4
                           __null
-# 220 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+# 218 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
                               ;
         fb = esp_camera_fb_get();
         serverConnection.sendBinary(COMMAND_FRAME,(const char *)fb->buf, fb->len);

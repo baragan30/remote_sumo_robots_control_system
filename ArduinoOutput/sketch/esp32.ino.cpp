@@ -215,7 +215,6 @@ void loop() {
     //Check and restablish internet connection
     if(!serverConnection.loop() ){
         spiCommunication.addData(COMMAND_CONNECTION, 0x00);
-        Serial.println("aici1");
         return;
     }
 
@@ -227,7 +226,6 @@ void loop() {
            lastLoginClock = millis();
         }
         spiCommunication.addData(COMMAND_CONNECTION, 0x00);
-        Serial.println("aici2");
         return;
     }
 

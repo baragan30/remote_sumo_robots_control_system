@@ -1,5 +1,6 @@
 from ast import Dict
 import time
+import traceback
 from typing import Any, Callable, Optional
 from uuid import UUID
 
@@ -60,9 +61,12 @@ class Connection:
                         finally:
                             self.__lock.release()
                     except Exception as e:
+                        print(e)
+                        traceback.print_exc()
                         self.handle_unknown_command(command)
         except Exception as e:
             print(e)
+            traceback.print_exc()
             pass
         finally:
             self.closeConnection()

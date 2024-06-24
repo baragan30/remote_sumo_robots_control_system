@@ -28,6 +28,8 @@ class Motor{
     void forceRight();
     void left();
     void right();
+    void frontLeft();
+    void frontRight();
     /*
     direction must be between(-PMAX and PMAX) (negative value for left and positive value for right)
     speed must be between(-PMAX and PMAX) (negative value for backward and positive value for forward)

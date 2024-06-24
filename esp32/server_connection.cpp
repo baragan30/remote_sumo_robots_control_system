@@ -23,7 +23,7 @@ bool ServerConnection::connect() {
             Serial.println(this->SSID2);
             WiFi.begin(this->SSID2, this->PASSWORD2);
         }else {
-            this->wifi_no = 1;
+            this->wifi_no = 2;
         }
         unsigned long startAttemptTime = millis();
         const unsigned long connectionTimeout = 1500; // 1.5 seconds
@@ -33,7 +33,7 @@ bool ServerConnection::connect() {
             IPAddress serverIp(localIP[0], localIP[1], localIP[2], this->STATIC_IP);
             this->url = "ws://" + serverIp.toString() + ":5000/connect/robot";
         }else {
-            this->wifi_no = (this->wifi_no) % 2 + 1;
+            // this->wifi_no = (this->wifi_no) % 2 + 1;
             return false;
         }
     }

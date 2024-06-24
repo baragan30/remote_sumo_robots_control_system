@@ -30,7 +30,7 @@ private:
     static constexpr uint16_t SPEED_OF_SOUND = 343; //Meters per Second
     static constexpr uint8_t NR_MEASUREMENTS = 13;
     static constexpr uint8_t DEGREE_STEP = 180/(NR_MEASUREMENTS - 1);
-    static constexpr uint8_t DELAY_SERVO_TIME = 3;
+    static constexpr uint8_t DELAY_SERVO_TIME = 2;
     
     ObstaclesDetectorState state;
     //angles at which we want to measure

@@ -4,7 +4,7 @@
 #include "robot_driver.h"
 SpiSlaveConnection spiConnection;
 RobotDriver driver(spiConnection);
-HardwareTester tester(spiConnection);
+// HardwareTester tester(spiConnection);
 
 
 void setup(){
@@ -27,7 +27,7 @@ void setup(){
 void loop()
 {
     driver.drive();
-    
+    // driver.autonomous();
 }
 ISR(SPI_STC_vect){
     spiConnection.interrupt();

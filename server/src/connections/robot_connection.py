@@ -5,7 +5,7 @@ from src.model.user import User
 from src.model.command_type import CommandType
 import time
 
-from src.strategies.strategy import Strategy2
+from strategies.strategies import Strategy2
 
 
 class RobotConnection(Connection):
@@ -19,8 +19,18 @@ class RobotConnection(Connection):
     def set_command_handlers(self)-> None:
         super().set_command_handlers()
         self.command_handlers[CommandType.FRAME] = self.handle_retransmit
-        self.command_handlers[CommandType.DISTANCE_DATA] = self.handle_retransmit
-        self.command_handlers[CommandType.RING_EDGE_DATA] = self.handle_retransmit
+        self.command_handlers[CommandType.DISTANCE_DATA] = self.handle_distance_data
+        self.command_handlers[CommandType.RING_EDGE_DATA] = self.handle_ring_edge_data
+
+    def handle_ring_edge_data(self, command:bytes)-> None:
+        robot:Robot = self.user
+        robot.sensorData.edgeData = command[1::]
+        self.user.send_message_to_linked_user(command)
+    
+    def handle_distance_data(self, command:bytes)-> None:
+        robot:Robot = self.user
+        robot.sensorData.distanceData = command[1::]
+        self.user.send_message_to_linked_user(command)
     
     def handle_retransmit(self, command:bytes) -> None:
         self.user.send_message_to_linked_user(command)
