@@ -28,6 +28,30 @@ uint8_t currentDurationIndex = 0;              // Index to keep track of the cur
 uint32_t loopDurations[MAX_LOOP_DURATIONS];
 uint32_t totalLoopDuration;
 
+#line 29 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+uint16_t loopsPerSecond();
+#line 49 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+void try_login();
+#line 58 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+void onMessageCallback(WebsocketsMessage message);
+#line 82 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+void onEventsCallback(WebsocketsEvent event, String data);
+#line 95 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+void initCamera();
+#line 133 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+void setup();
+#line 145 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+void transmitSensorsData();
+#line 187 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+void loop();
+#line 29 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+uint16_t loopsPerSecond(){
+  uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
+  if(timePerLoopInMicrosSec == 0)
+    timePerLoopInMicrosSec = 1;
+  return 1000000/timePerLoopInMicrosSec;
+}
+
 enum Commands{
     COMMAND_REGISTER = 0x00,
     COMMAND_LINK = 0x01,
@@ -41,23 +65,6 @@ enum Commands{
 };
 
 
-#line 42 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-void try_login();
-#line 51 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-void onMessageCallback(WebsocketsMessage message);
-#line 74 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-void onEventsCallback(WebsocketsEvent event, String data);
-#line 87 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-void initCamera();
-#line 125 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-void setup();
-#line 140 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-void transmitSensorsData();
-#line 183 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-uint16_t loopsPerSecond();
-#line 190 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-void loop();
-#line 42 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
 void try_login(){
     if(gotFirstUUID == false){
         serverConnection.sendBinary((char)COMMAND_REGISTER,NULL, 0);
@@ -84,7 +91,8 @@ void onMessageCallback(WebsocketsMessage message) {
             transmitVideStreaming = (bool) s[1];
         break;
         case COMMAND_MOTOR_POWER:
-            spiCommunication.addData(s, 3);
+            if(loopsPerSecond() > 9)
+                spiCommunication.addData(s, 3);
         break;
         default:
         break;
@@ -127,7 +135,7 @@ void initCamera(){
     config.pixel_format = PIXFORMAT_JPEG;
     config.grab_mode = CAMERA_GRAB_LATEST;
     config.frame_size = FRAMESIZE_QVGA; //FRAMESIZE_96X96; //FRAMESIZE_QQVGA; //FRAMESIZE_SVGA;
-    config.jpeg_quality = 16;
+    config.jpeg_quality = 20;
     config.fb_count = 2;
     config.fb_location = CAMERA_FB_IN_DRAM;
     esp_err_t err = esp_camera_init(&config);
@@ -153,9 +161,6 @@ void setup() {
     }
     totalLoopDuration = 0;
 }
-
-long long sterge = millis();
-
 void transmitSensorsData(){
     uint8_t *p =  spiCommunication.getReceivedData();
     uint8_t size = spiCommunication.getReceivedDataSize();
@@ -197,14 +202,6 @@ void transmitSensorsData(){
     }
 }
 
-
-
-uint16_t loopsPerSecond(){
-  uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
-  if(timePerLoopInMicrosSec == 0)
-    timePerLoopInMicrosSec = 1;
-  return 1000000/timePerLoopInMicrosSec;
-}
 
 void loop() {
     unsigned long startLoopTime = micros();

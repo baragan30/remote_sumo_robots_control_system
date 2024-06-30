@@ -1,9 +1,9 @@
 from typing import Optional,TypeVar, Generic, Optional
 from abc import ABC, abstractmethod
 
-from src.model.edge_line_position import EdgeLinePosition, SimplePreprocesedData
+from src.model.simple_preprocessed_data import EdgeLinePosition, SimplePreprocessedData
 from src.model.robot_sensors_data import RobotControlData, RobotSensorsData
-from strategies.tactics import Tactic,AdvanceAndPivotTactic,EdgeReflexTurnBackTactic
+from src.strategies.tactics import Tactic,AdvanceAndPivotTactic,EdgeReflexTurnBackTactic,StraightAttack
 
 T = TypeVar('T')
 
@@ -20,7 +20,7 @@ class Strategy(Generic[T], ABC):
             controlData = self.tactic.run(preprocessedData)
             if controlData == None:
                 self.tactic = self.chooseTactic(preprocessedData)
-            
+                print(f"Chage tactic {self.tactic}")
         return controlData
             
     def chooseTactic(self, data :T) -> Tactic:
@@ -29,15 +29,18 @@ class Strategy(Generic[T], ABC):
     def preprocessData(self, robotSensorsData :RobotSensorsData) -> T:
         pass
 
-class SimplePreprocessedDataStrategy(Strategy[SimplePreprocesedData]):
-    def preprocessData(self, robotSensorsData: RobotSensorsData) -> SimplePreprocesedData:
-        return SimplePreprocesedData(robotSensorsData)
+class SimplePreprocessedDataStrategy(Strategy[SimplePreprocessedData]):
+    def preprocessData(self, robotSensorsData: RobotSensorsData) -> SimplePreprocessedData:
+        return SimplePreprocessedData(robotSensorsData)
 
 class Strategy2(SimplePreprocessedDataStrategy):
-    def chooseTactic(self, data :SimplePreprocesedData) -> Tactic:
+    def chooseTactic(self, data :SimplePreprocessedData) -> Tactic:
         edgeLinePosition = data.edgePosition
-        if edgeLinePosition == EdgeLinePosition.NO_POSITION :
-            return AdvanceAndPivotTactic()
-        return EdgeReflexTurnBackTactic()
+        if edgeLinePosition != EdgeLinePosition.NO_POSITION :
+             return EdgeReflexTurnBackTactic()
+        if data.enemyPosition.isDetected():
+            return StraightAttack()
+        return AdvanceAndPivotTactic()
+       
     
     

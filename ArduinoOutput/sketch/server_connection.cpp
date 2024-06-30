@@ -15,20 +15,25 @@ ServerConnection::ServerConnection()
 
 bool ServerConnection::connect() {
     if(WiFi.status() != WL_CONNECTED){
-        if(this->wifi_no == 1){
+        // if(this->wifi_no == 1){
+        //     Serial.print("Try connecting to Wifi: ");
+        //     Serial.println(this->SSID1);
+        //     WiFi.begin(this->SSID1, this->PASSWORD1);
+        // }else if(this->wifi_no == 2){
+        //     Serial.print("Try connecting to Wifi: ");
+        //     Serial.println(this->SSID2);
+        //     WiFi.begin(this->SSID2, this->PASSWORD2);
+        // }else if(this->wifi_no == 3){
             Serial.print("Try connecting to Wifi: ");
-            Serial.println(this->SSID1);
-            WiFi.begin(this->SSID1, this->PASSWORD1);
-        }else if(this->wifi_no == 2){
-            Serial.print("Try connecting to Wifi: ");
-            Serial.println(this->SSID2);
-            WiFi.begin(this->SSID2, this->PASSWORD2);
-        }else {
-            this->wifi_no = 2;
-        }
-        unsigned long startAttemptTime = millis();
-        const unsigned long connectionTimeout = 1500; // 1.5 seconds
-        while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < connectionTimeout);
+            Serial.println(this->SSID3);
+            WiFi.begin(this->SSID3, this->PASSWORD3);
+        // }else {
+        //     this->wifi_no = 3;
+        // }
+        const unsigned long connectionTimeout = 3000;
+        unsigned long startAttemptTime = millis() + connectionTimeout;
+        
+        while (WiFi.status() != WL_CONNECTED && millis() < connectionTimeout);
         if(WiFi.status() == WL_CONNECTED){
             IPAddress localIP = WiFi.localIP();
             IPAddress serverIp(localIP[0], localIP[1], localIP[2], this->STATIC_IP);
@@ -116,4 +121,7 @@ const char ServerConnection::PASSWORD1[] PROGMEM = "voidmain()";
 
 const char ServerConnection::SSID2[] PROGMEM = "BRG";
 const char ServerConnection::PASSWORD2[] PROGMEM = "brgbrgbrg3";
+
+const char ServerConnection::SSID3[] PROGMEM = "Robot";
+const char ServerConnection::PASSWORD3[] PROGMEM = "12345678";
 

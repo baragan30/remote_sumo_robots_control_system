@@ -27,6 +27,13 @@ uint8_t currentDurationIndex = 0; // Index to keep track of the current loop dur
 uint32_t loopDurations[MAX_LOOP_DURATIONS];
 uint32_t totalLoopDuration;
 
+uint16_t loopsPerSecond(){
+  uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
+  if(timePerLoopInMicrosSec == 0)
+    timePerLoopInMicrosSec = 1;
+  return 1000000/timePerLoopInMicrosSec;
+}
+
 enum Commands{
     COMMAND_REGISTER = 0x00,
     COMMAND_LINK = 0x01,
@@ -43,9 +50,9 @@ enum Commands{
 void try_login(){
     if(gotFirstUUID == false){
         serverConnection.sendBinary((char)COMMAND_REGISTER,
-# 44 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino" 3 4
+# 51 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino" 3 4
                                                           __null
-# 44 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+# 51 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
                                                               , 0);
     }else{
         serverConnection.sendBinary((char)COMMAND_REGISTER, robot_uuid, ROBOT_UUID_SIZE);
@@ -70,7 +77,8 @@ void onMessageCallback(WebsocketsMessage message) {
             transmitVideStreaming = (bool) s[1];
         break;
         case COMMAND_MOTOR_POWER:
-            spiCommunication.addData(s, 3);
+            if(loopsPerSecond() > 9)
+                spiCommunication.addData(s, 3);
         break;
         default:
         break;
@@ -113,7 +121,7 @@ void initCamera(){
     config.pixel_format = PIXFORMAT_JPEG;
     config.grab_mode = CAMERA_GRAB_LATEST;
     config.frame_size = FRAMESIZE_QVGA; //FRAMESIZE_96X96; //FRAMESIZE_QQVGA; //FRAMESIZE_SVGA;
-    config.jpeg_quality = 16;
+    config.jpeg_quality = 20;
     config.fb_count = 2;
     config.fb_location = CAMERA_FB_IN_DRAM;
     esp_err_t err = esp_camera_init(&config);
@@ -139,9 +147,6 @@ void setup() {
     }
     totalLoopDuration = 0;
 }
-
-long long sterge = millis();
-
 void transmitSensorsData(){
     uint8_t *p = spiCommunication.getReceivedData();
     uint8_t size = spiCommunication.getReceivedDataSize();
@@ -184,14 +189,6 @@ void transmitSensorsData(){
 }
 
 
-
-uint16_t loopsPerSecond(){
-  uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
-  if(timePerLoopInMicrosSec == 0)
-    timePerLoopInMicrosSec = 1;
-  return 1000000/timePerLoopInMicrosSec;
-}
-
 void loop() {
     unsigned long startLoopTime = micros();
 
@@ -221,9 +218,9 @@ void loop() {
     // Transmit Video Freame
     if(transmitVideStreaming && loopsPerSecond() > 20){
         camera_fb_t * fb = 
-# 218 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino" 3 4
+# 215 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino" 3 4
                           __null
-# 218 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+# 215 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
                               ;
         fb = esp_camera_fb_get();
         serverConnection.sendBinary(COMMAND_FRAME,(const char *)fb->buf, fb->len);

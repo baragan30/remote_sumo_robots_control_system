@@ -30,10 +30,10 @@ void Motor::forceRight(){
 }
 
 void Motor::left(){
-    move(-20,20);
+    move(-40,40);
 }
 void Motor::right(){
-    move(20,-20);
+    move(40,-40);
 }
 
 void Motor::frontLeft(){

@@ -7,6 +7,10 @@ class RobotSensorsData:
         self._distanceData:Optional[bytes] = None
         self._edgeData:Optional[bytes] = None
 
+    def reset(self) -> None:
+        self.distanceData = None
+        self.edgeData = None
+
     @property
     def frame(self) -> bytes:
         return self._frame
@@ -33,7 +37,7 @@ class RobotSensorsData:
 
 class RobotControlData:
     def __init__(self) -> None:
-        self._motorPowers:Optional[bytes] = None
+        self._motorPowers: Optional[bytes] = None
 
     @property
     def motorPowers(self) -> bytes:
@@ -50,3 +54,45 @@ class RobotControlData:
         # Pack powerLeft and powerRight as signed bytes and assign them to motorPowers
         robotData.motorPowers = bytearray(struct.pack('bb', powerLeft, powerRight))
         return robotData
+    
+    SLOW_POWER = 40
+    
+    @staticmethod
+    def stop() -> 'RobotControlData':
+         return RobotControlData.from_powers(0, 0)
+    
+    @staticmethod
+    def left_rotate() -> 'RobotControlData':
+         return RobotControlData.from_powers(-100, 100)
+    
+    @staticmethod
+    def left_slow_rotate() -> 'RobotControlData':
+         return RobotControlData.from_powers(-RobotControlData.SLOW_POWER, RobotControlData.SLOW_POWER)
+    
+    @staticmethod
+    def right_rotate() -> 'RobotControlData':
+         return RobotControlData.from_powers(100, -100)
+    
+    @staticmethod
+    def right_slow_rotate() -> 'RobotControlData':
+         return RobotControlData.from_powers(RobotControlData.SLOW_POWER, -RobotControlData.SLOW_POWER)
+    
+    @staticmethod
+    def forward() -> 'RobotControlData':
+         return RobotControlData.from_powers(100, 100)
+    
+    @staticmethod
+    def forward_left() -> 'RobotControlData':
+         return RobotControlData.from_powers(2, 100)
+    
+    @staticmethod
+    def forward_slow() -> 'RobotControlData':
+         return RobotControlData.from_powers(RobotControlData.SLOW_POWER, RobotControlData.SLOW_POWER)
+    
+    @staticmethod
+    def forward_right() -> 'RobotControlData':
+         return RobotControlData.from_powers(100, 2)
+    
+    @staticmethod
+    def backward() -> 'RobotControlData':
+         return RobotControlData.from_powers(-100, -100)

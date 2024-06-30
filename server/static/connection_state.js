@@ -119,7 +119,6 @@ class RobotIdleState extends ConnectionState {
       [CommandType.DISTANCE_DATA]: this.handleDistanceData.bind(this),
       [CommandType.RING_EDGE_DATA]: this.handleRingEdgeData.bind(this),
     };
-    this.IsReceivingVideoStream = true;
   }
   start() {
     super.start();
@@ -143,9 +142,7 @@ class RobotIdleState extends ConnectionState {
     if (input == 'w' || input == 's' || input == 'a' || input == 'd') {
       this.robotController.setState(RobotOperationalState);
     }else if (input == 'q') {
-      this.lastTransmissionTime = new Date();
-      this.IsReceivingVideoStream = !this.IsReceivingVideoStream;
-      this.robotController.server.send(CommandType.VIDEO_STREAM, new Uint8Array([this.IsReceivingVideoStream]))
+      this.handleQUserInput();
     }else if(input == ' '){
       this.robotController.hasIdleState = false;
       this.changeState();
@@ -167,14 +164,11 @@ class RobotIdleState extends ConnectionState {
     }
   }
 
-  handleConnection(command, data) {
-    if (data[0] == 0) {
-      this.robotController.setState(RobotLostConnectionState);
-    }
-  }
-
   handleFrame(command, data) {
-    this.robotController.uiController.drawImage(data);
+    if(this.robotController.IsReceivingVideoStream)
+      this.robotController.uiController.drawImage(data);
+    else 
+      this.robotController.server.send(CommandType.VIDEO_STREAM, new Uint8Array([this.robotController.IsReceivingVideoStream]))
   }
   handleDistanceData(command, data) {
     this.robotController.uiController.displayDistanceData(data);
@@ -186,10 +180,18 @@ class RobotIdleState extends ConnectionState {
   handleDefault(command, data) {
     console.log(`Received unrecognized command ${command} with data:`, data);
   }
+  handleQUserInput(){
+    this.lastTransmissionTime = new Date();
+    this.robotController.IsReceivingVideoStream = !this.robotController.IsReceivingVideoStream;
+    this.robotController.server.send(CommandType.VIDEO_STREAM, new Uint8Array([this.robotController.IsReceivingVideoStream]))
+    if(!this.robotController.IsReceivingVideoStream)
+      this.robotController.uiController.canvasController.clearImage();
+  }
+
 }
 
 class RobotOperationalState extends RobotIdleState {
-  static MAX_TRANSMISSION_TIME = 60;
+  static MAX_TRANSMISSION_TIME = 50;
 
   constructor(robotController) {
     super(robotController);
@@ -212,6 +214,7 @@ class RobotOperationalState extends RobotIdleState {
       this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([0,0]));
       this.lastTransmissionTime = new Date();
     }
+    
   }
 
   onUserInput(input) {
@@ -228,9 +231,8 @@ class RobotOperationalState extends RobotIdleState {
       this.lastTransmissionTime = new Date();
       this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([100,-100]))
     }else if (input == 'q') {
-      this.lastTransmissionTime = new Date();
-      this.IsReceivingVideoStream = !this.IsReceivingVideoStream;
-      this.robotController.server.send(CommandType.VIDEO_STREAM, new Uint8Array([this.IsReceivingVideoStream]))
+      this.handleQUserInput();
+
     }else if(input == ' '){
       this.robotController.hasIdleState = true;
       this.robotController.setState(RobotIdleState);
@@ -238,6 +240,8 @@ class RobotOperationalState extends RobotIdleState {
     // console.log(`User Input ${input}`);
   }
 }
+
+
 
 
 class RobotAutonomousState extends RobotIdleState {
@@ -263,9 +267,7 @@ class RobotAutonomousState extends RobotIdleState {
       this.robotController.hasIdleState = false;
       this.robotController.setState(RobotOperationalState);
     }else if (input == 'q') {
-      this.lastTransmissionTime = new Date();
-      this.IsReceivingVideoStream = !this.IsReceivingVideoStream;
-      this.robotController.server.send(CommandType.VIDEO_STREAM, new Uint8Array([this.IsReceivingVideoStream]))
+      this.handleQUserInput();
     }else if(input == ' '){
       this.robotController.hasIdleState = true;
       this.robotController.setState(RobotIdleState);

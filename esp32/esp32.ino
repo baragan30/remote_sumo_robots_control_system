@@ -26,6 +26,13 @@ uint8_t currentDurationIndex = 0;              // Index to keep track of the cur
 uint32_t loopDurations[MAX_LOOP_DURATIONS];
 uint32_t totalLoopDuration;
 
+uint16_t loopsPerSecond(){
+  uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
+  if(timePerLoopInMicrosSec == 0)
+    timePerLoopInMicrosSec = 1;
+  return 1000000/timePerLoopInMicrosSec;
+}
+
 enum Commands{
     COMMAND_REGISTER = 0x00,
     COMMAND_LINK = 0x01,
@@ -65,7 +72,8 @@ void onMessageCallback(WebsocketsMessage message) {
             transmitVideStreaming = (bool) s[1];
         break;
         case COMMAND_MOTOR_POWER:
-            spiCommunication.addData(s, 3);
+            if(loopsPerSecond() > 9)
+                spiCommunication.addData(s, 3);
         break;
         default:
         break;
@@ -108,7 +116,7 @@ void initCamera(){
     config.pixel_format = PIXFORMAT_JPEG;
     config.grab_mode = CAMERA_GRAB_LATEST;
     config.frame_size = FRAMESIZE_QVGA; //FRAMESIZE_96X96; //FRAMESIZE_QQVGA; //FRAMESIZE_SVGA;
-    config.jpeg_quality = 16;
+    config.jpeg_quality = 20;
     config.fb_count = 2;
     config.fb_location = CAMERA_FB_IN_DRAM;
     esp_err_t err = esp_camera_init(&config);
@@ -134,9 +142,6 @@ void setup() {
     }
     totalLoopDuration = 0;
 }
-
-long long sterge = millis();
-
 void transmitSensorsData(){
     uint8_t *p =  spiCommunication.getReceivedData();
     uint8_t size = spiCommunication.getReceivedDataSize();
@@ -178,14 +183,6 @@ void transmitSensorsData(){
     }
 }
 
-
-
-uint16_t loopsPerSecond(){
-  uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
-  if(timePerLoopInMicrosSec == 0)
-    timePerLoopInMicrosSec = 1;
-  return 1000000/timePerLoopInMicrosSec;
-}
 
 void loop() {
     unsigned long startLoopTime = micros();

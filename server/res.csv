@@ -1,0 +1,61 @@
+Test ID,Control Scenario,Object,Position,Time Mean sec.,Result
+1,Autonomous,A,1,2.81,Object out
+2,Autonomous,A,1,6.32,Object out
+3,Autonomous,A,2,4.49,Object out
+4,Autonomous,A,2,18.31,Object out
+5,Autonomous,A,3,4.18,Object out
+6,Autonomous,A,3,4.31,Object out
+7,Autonomous,A,4,4.22,Object out
+8,Autonomous,A,4,13.99,Object out
+9,Autonomous,A,5,6.02,Object out
+10,Autonomous,A,5,25.09,Object out
+11,Autonomous,B,1,32,Object out
+12,Autonomous,B,1,7.95,Object out
+13,Autonomous,B,2,20.67,Object out
+14,Autonomous,B,2,24.01,Object out
+15,Autonomous,B,3,18.93,Object out
+16,Autonomous,B,3,8.79,Object out
+17,Autonomous,B,4,12.36,Object out
+18,Autonomous,B,4,13.00,Object out
+19,Autonomous,B,5,48.83,Object out
+20,Autonomous,B,5,20.78,Object out
+21,Strategy1,A,1,12.61,Object out
+22,Strategy1,A,1,12.57,Object out
+23,Strategy1,A,2,4.56,Object out
+24,Strategy1,A,2,13.56,Object out
+25,Strategy1,A,3,13.45,Object out
+26,Strategy1,A,3,3.78,Object out
+27,Strategy1,A,4,6.29,Object out
+28,Strategy1,A,4,3.76,Object out
+29,Strategy1,A,5,7.82,Object out
+30,Strategy1,A,5,8.16,Object out
+31,Strategy1,B,1,8.29,Object out
+32,Strategy1,B,1,11.28,Object out
+33,Strategy1,B,2,26.08,Object out
+34,Strategy1,B,2,6.19,Object out
+35,Strategy1,B,3,23.59,Object out
+36,Strategy1,B,3,13.08,Object out
+37,Strategy1,B,4,10.40,Object out
+38,Strategy1,B,4,19.20,Object out
+39,Strategy1,B,5,28.53,Object out
+40,Strategy1,B,5,31.71,Object out
+41,Human Control,A,1,1.77,Object out
+42,Human Control,A,1,1.68,Object out
+43,Human Control,A,2,10.77,Object out
+44,Human Control,A,2,7.44,Object out
+45,Human Control,A,3,6.97,Object out
+46,Human Control,A,3,5.70,Object out
+47,Human Control,A,4,3.52,Object out
+48,Human Control,A,4,4.94,Object out
+49,Human Control,A,5,9.46,Robot out
+50,Human Control,A,5,9.32,Object out
+51,Human Control,B,1,3.32,Object out
+52,Human Control,B,1,3.89,Object out
+53,Human Control,B,2,8.73,Object out
+54,Human Control,B,2,8.40,Object out
+55,Human Control,B,3,9.03,Object out
+56,Human Control,B,3,7.46,Object out
+57,Human Control,B,4,4.56,Object out
+58,Human Control,B,4,5.02,Object out
+59,Human Control,B,5,18.21,Object out
+60,Human Control,B,5,9.21,Object out

@@ -18,6 +18,7 @@ class RobotController{
 
     this.uiController = new UiController()
     this.hasIdleState = true;
+    this.IsReceivingVideoStream = true;
   }
 
   disconnect(){

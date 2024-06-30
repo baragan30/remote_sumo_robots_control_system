@@ -5,7 +5,7 @@ from src.model.user import User
 from src.model.command_type import CommandType
 import time
 
-from strategies.strategies import Strategy2
+from src.strategies.strategies import Strategy2
 
 
 class RobotConnection(Connection):
@@ -41,15 +41,15 @@ class RobotConnection(Connection):
         while message :
             if message[0] == CommandType.STRATEGY.value:
                 if message[1] == 0:
-                    robot.strategy = None
+                    robot.removeStrategy()
                     robot.isIdle = True
                     self.transmit_command(message)
                 elif message[1] == 1:
-                    robot.strategy = None
+                    robot.removeStrategy()
                     robot.isIdle = False
                 elif message[1] == 2:
                     robot.isIdle = False
-                    robot.strategy = Strategy2()
+                    robot.setStrategy(Strategy2())
             elif message[0] == CommandType.MOTOR_POWER.value:
                 robot.isIdle = False
                 robot.controlData.motorPowers = message[1:]

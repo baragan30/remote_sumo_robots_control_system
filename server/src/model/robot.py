@@ -1,7 +1,7 @@
 from typing import Optional
 from src.model.robot_sensors_data import RobotControlData, RobotSensorsData
 from src.model.user import User
-from strategies.strategies import Strategy
+from src.strategies.strategies import Strategy
 
 
 class Robot(User):
@@ -14,6 +14,16 @@ class Robot(User):
 
     def getName(self) -> str:
         return f"Robot {self.uid}"
+    
+    def setStrategy(self, strategy:Strategy):
+        """Sets the strategy for the robot if it is of a different class type than the current strategy."""
+        if not isinstance(self.strategy, strategy.__class__):
+            self.sensorData.reset()
+            self.strategy = strategy
+
+    def removeStrategy(self):
+        """Sets the strategy for the robot if it is of a different class type than the current strategy."""
+        self.strategy = None
     
     def runStrategy(self) ->None:
         if self.strategy:

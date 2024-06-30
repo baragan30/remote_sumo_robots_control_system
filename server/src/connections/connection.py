@@ -26,14 +26,16 @@ class Connection:
                     self.__lock.acquire()
                     try:
                         self.loop()
+                    
                     finally:
                         self.__lock.release()
                 else :
                     # if the user is not authentificated sleep 250 ms
                     time.sleep(0.25)
         except Exception as e:
-            print(e)
-            pass
+            print("An error occurred:", str(e))
+            # Print the full stack trace
+            traceback.print_exc()
         finally:
             self.closeConnection()
             self.on_end()

@@ -21,11 +21,13 @@ private:
     static const char PASSWORD1[] PROGMEM;
     static const char SSID2[] PROGMEM;
     static const char PASSWORD2[] PROGMEM;
+      static const char SSID3[] PROGMEM;
+    static const char PASSWORD3[] PROGMEM;
     static const uint8_t STATIC_IP PROGMEM;
 
     unsigned long waitClockMs;
     String url;
-    uint8_t wifi_no  = 2;
+    uint8_t wifi_no  = 3;
 
 };
 

@@ -46,7 +46,11 @@ void RobotDriver::drive(){
             break;
         case COMMAND_MOTOR_POWER:
             state = ROBOT_DRIVER_REMOTE_CONTROL_STATE;
-            motor.move(p[1], p[2]);
+            if( (lineDec.isHitten() && (int8_t)p[1] > 0 && (int8_t)p[2] > 0 )){
+                motor.move(-10, -10);
+            }else{
+                motor.move(p[1], p[2]);
+            }
             p+=3;
             lastTransmissionClock = millis();
             break;
@@ -62,7 +66,7 @@ void RobotDriver::drive(){
             spiConnection.addData(COMMAND_RING_EDGE_DATA,lineDec.getSensorsData());
             break;
         case ROBOT_DRIVER_REMOTE_CONTROL_STATE:
-            if(millis() - lastTransmissionClock > 300u){
+            if(millis() - lastTransmissionClock > 100u){
                 state = ROBOT_DRIVER_AUTONOMOUS_STATE;
                 Serial.println("autonomous");
                 break;
@@ -103,7 +107,8 @@ void RobotDriver::autonomousTest() {
 }
 
 void RobotDriver::autonomous(){
-    
+    obsDec.detect();
+    lineDec.read();
     if(action1.isUnfolding()){
         motor.move(action1.speedLeft, action1.speedRight);
         return;
@@ -111,8 +116,6 @@ void RobotDriver::autonomous(){
         motor.move(action2.speedLeft, action2.speedRight);
         return;
     }
-    
-    lineDec.read();
     if(lineDec.isHitten()){
         int8_t relativePosition = lineDec.getRelativePosition();
         int8_t left,right;
@@ -162,20 +165,19 @@ void RobotDriver::autonomous(){
         action2 = ActionClock(action1Time + action2Time,left, right);
         return;
     }
-    obsDec.detect();
     int16_t pos = obsDec.enemyPosition;
     uint8_t distance = obsDec.enemyDistance;
     const uint8_t engageDistance = 10;
 
     switch (pos) {
          case 0 ... 59:    //Right
-            motor.right();
+            motor.forceRight();
             break;
         case 60 ... 74:
             if(obsDec.enemyDistance <= engageDistance)
                 motor.frontRight();
             else
-                motor.right();
+                motor.forceRight();
             break;
         case 75 ... 105:
             motor.forward();
@@ -184,10 +186,10 @@ void RobotDriver::autonomous(){
             if(obsDec.enemyDistance <= engageDistance)
                motor.frontLeft();
             else
-                motor.left();
+                motor.forceLeft();
             break;
         case 121 ... 180: //Left
-            motor.left();
+            motor.forceLeft();
             break;
         default:   //-1
             motor.move(15,15);//move slow forward
