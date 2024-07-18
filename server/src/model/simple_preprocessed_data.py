@@ -73,23 +73,23 @@ class EnemyPosition:
         valid_values = [val if 1 <= val <= EnemyPosition.THRESHOLD_MAX else 0 for val in values]
 
         # Compute inverted weights, where lower values give higher weights, and normalize them
-        inverted_weights = [1 / val if val > 0 else 0 for val in valid_values]
-        total_inverted_weights = sum(inverted_weights)
+        inverted_distances = [1 / val if val > 0 else 0 for val in valid_values]
+        sum_inverted_distances = sum(inverted_distances)
         
         # Normalize weights so that their sum is 1
-        if total_inverted_weights == 0:
+        if sum_inverted_distances == 0:
             return 0, (start_index + 1) * 15  # If all weights are zero, return default angle
         
-        normalized_weights = [weight / total_inverted_weights for weight in inverted_weights]
+        normalized_weights = [weight / sum_inverted_distances for weight in inverted_distances]
 
-        # Compute weighted average for distance and angle
-        weighted_values = [value * weight for value, weight in zip(valid_values, normalized_weights)]
-
-        
+       
         angles = [start_index * 15, (start_index + 1) * 15, (start_index + 2) * 15]
-        weighted_angles = [angle * weight for angle, weight in zip(angles, normalized_weights)]
         
-        weighted_mean_distance = sum(weighted_values)
+        # Compute weighted average for distance and angle
+        weighted_angles = [angle * weight for angle, weight in zip(angles, normalized_weights)]
+        weighted_distances = [value * weight for value, weight in zip(valid_values, normalized_weights)]
+
+        weighted_mean_distance = sum(weighted_distances)
         weighted_mean_angle = sum(weighted_angles)
 
         return weighted_mean_distance, weighted_mean_angle

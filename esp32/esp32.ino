@@ -1,5 +1,3 @@
-
-
 #include "server_connection.h"
 #include "spi_master_communication.h"
 #include "esp_camera.h"
@@ -25,6 +23,7 @@ static const uint8_t MAX_LOOP_DURATIONS = 10;  // Defines the number of loop dur
 uint8_t currentDurationIndex = 0;              // Index to keep track of the current loop duration entry
 uint32_t loopDurations[MAX_LOOP_DURATIONS];
 uint32_t totalLoopDuration;
+bool isInFullRemoteControl = false;
 
 uint16_t loopsPerSecond(){
   uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
@@ -67,12 +66,13 @@ void onMessageCallback(WebsocketsMessage message) {
         break;
         case COMMAND_STRATEGY:
             spiCommunication.addData(s, 2);
+            isInFullRemoteControl = (s[1] == 0x01);
         break;
         case COMMAND_VIDEO_STREAMING:
             transmitVideStreaming = (bool) s[1];
         break;
         case COMMAND_MOTOR_POWER:
-            if(loopsPerSecond() > 9)
+            if(isInFullRemoteControl || loopsPerSecond() > 9)
                 spiCommunication.addData(s, 3);
         break;
         default:

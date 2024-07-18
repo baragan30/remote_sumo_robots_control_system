@@ -152,10 +152,17 @@ class RobotIdleState extends ConnectionState {
   changeState(){
     let value = this.robotController.selectStrategyPad.getSelectValue();
     if(value == 1){
-        this.robotController.setState(RobotOperationalState);
-      }else if (value == 2){
-        this.robotController.setState(RobotAutonomousState);
-      }
+      this.robotController.setState(RobotFullRemoteControlState);
+      return;
+    }
+    if(value == 2){
+      this.robotController.setState(RobotOperationalState);
+      return;
+     }
+    if (value == 3){
+      this.robotController.setState(RobotAutonomousState);
+      return;
+    }
   }
 
   handleConnection(command, data) {
@@ -181,7 +188,7 @@ class RobotIdleState extends ConnectionState {
     console.log(`Received unrecognized command ${command} with data:`, data);
   }
   handleQUserInput(){
-    this.lastTransmissionTime = new Date();
+    this.lastPowersTransmissionTime = new Date();
     this.robotController.IsReceivingVideoStream = !this.robotController.IsReceivingVideoStream;
     this.robotController.server.send(CommandType.VIDEO_STREAM, new Uint8Array([this.robotController.IsReceivingVideoStream]))
     if(!this.robotController.IsReceivingVideoStream)
@@ -191,44 +198,46 @@ class RobotIdleState extends ConnectionState {
 }
 
 class RobotOperationalState extends RobotIdleState {
-  static MAX_TRANSMISSION_TIME = 50;
+  static MAX_POWERS_TRANSMISSION_TIME = 50;
+  static MAX_STRATEGY_TRANSMISSION_TIME = 300;
 
   constructor(robotController) {
     super(robotController);
-    this.lastTransmissionTime = new Date();
+    this.lastPowersTransmissionTime = new Date();
+    this.lastStrategyTransmissionTime = new Date();
   }
   start() {
     this.robotController.uiController.displayText("Remote Control");
     this.robotController.selectStrategyPad.setStopButton();
     this.robotController.selectStrategyPad.setSelectValue(1);
     this.robotController.hasIdleState = false;
-
-    let strategyValue = new Uint8Array([0x01]);
-    this.robotController.server.send(CommandType.STRATEGY,strategyValue);
-
-    this.robotController.startLoop(RobotOperationalState.MAX_TRANSMISSION_TIME);
+    this.robotController.startLoop(RobotOperationalState.MAX_POWERS_TRANSMISSION_TIME);
   }
   loop() {
     //it past 300 ms
-    if((new Date()) - this.lastTransmissionTime >= RobotOperationalState.MAX_TRANSMISSION_TIME){
+    if((new Date()) - this.lastPowersTransmissionTime >= RobotOperationalState.MAX_POWERS_TRANSMISSION_TIME){
       this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([0,0]));
-      this.lastTransmissionTime = new Date();
+      this.lastPowersTransmissionTime = new Date();
     }
-    
+    if((new Date()) - this.lastStrategyTransmissionTime >= RobotOperationalState.MAX_STRATEGY_TRANSMISSION_TIME){
+      let strategyValue = new Uint8Array([0x02]);
+      this.robotController.server.send(CommandType.STRATEGY,strategyValue);
+      this.lastStrategyTransmissionTime = new Date();
+    }
   }
 
   onUserInput(input) {
     if (input == 'w') {
-      this.lastTransmissionTime = new Date();
+      this.lastPowersTransmissionTime = new Date();
       this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([100,100]))
     }else if (input == 's') {
-      this.lastTransmissionTime = new Date();
+      this.lastPowersTransmissionTime = new Date();
       this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([-100,-100]))
     }else if (input == 'a') {
-      this.lastTransmissionTime = new Date();
+      this.lastPowersTransmissionTime = new Date();
       this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([-100,100]))
     }else if (input == 'd') {
-      this.lastTransmissionTime = new Date();
+      this.lastPowersTransmissionTime = new Date();
       this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([100,-100]))
     }else if (input == 'q') {
       this.handleQUserInput();
@@ -241,6 +250,25 @@ class RobotOperationalState extends RobotIdleState {
   }
 }
 
+class RobotFullRemoteControlState extends RobotOperationalState {
+  loop() {
+    if((new Date()) - this.lastPowersTransmissionTime >= RobotOperationalState.MAX_POWERS_TRANSMISSION_TIME){
+      this.robotController.server.send(CommandType.MOTOR_POWER, new Int8Array([0,0]));
+      this.lastPowersTransmissionTime = new Date();
+    }
+    if((new Date()) - this.lastStrategyTransmissionTime >= RobotOperationalState.MAX_STRATEGY_TRANSMISSION_TIME){
+      let strategyValue = new Uint8Array([0x01]);
+      this.robotController.server.send(CommandType.STRATEGY,strategyValue);
+      this.lastStrategyTransmissionTime = new Date();
+    }
+  }
+  start() {
+    super.start();
+    this.robotController.uiController.displayText("Full Remote Control");
+  }
+
+}
+
 
 
 
@@ -248,11 +276,10 @@ class RobotAutonomousState extends RobotIdleState {
 
   constructor(robotController) {
     super(robotController);
-    this.lastTransmissionTime = new Date();
+    this.lastPowersTransmissionTime = new Date();
   }
   start() {
-    
-    this.robotController.uiController.displayText("Strategy " + this.robotController.selectStrategyPad.getSelectValue());
+    this.robotController.uiController.displayText("Strategy " + (this.robotController.selectStrategyPad.getSelectValue() - 2));
     this.robotController.selectStrategyPad.setStopButton();
     this.robotController.hasIdleState = false;
     this.robotController.startLoop(250);

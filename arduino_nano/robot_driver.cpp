@@ -18,34 +18,31 @@ void RobotDriver::drive(){
     uint8_t data[SpiSlaveConnection::BUFFER_CAPACTITY];
     uint8_t size = spiConnection.getData(data);
     uint8_t* p = data, *end = data + size;
-    for(uint8_t *p = data; p < end; p++){
-        Serial.print(p[0]);
-        Serial.print(' ');
-    }if(size != 0){
-        Serial.println();
-        Serial.print("Transmission : ");
-        Serial.println(millis() - lastTransmissionClock);
-    }
+    // for(uint8_t *p = data; p < end; p++){
+    //     Serial.print(p[0]);
+    //     Serial.print(' ');
+    // }if(size != 0){
+    //     Serial.println();
+    //     Serial.print("Transmission : ");
+    //     Serial.println(millis() - lastTransmissionClock);
+    // }
     
     while (p < end) {
         switch (*p)
         {
         case COMMAND_CONNECTION:
-            if(state != ROBOT_DRIVER_IDLE_STATE){
-                if(p[1]){
-                    state = ROBOT_DRIVER_REMOTE_CONTROL_STATE;
-                    motor.stop();
-                }
-            }
             p+=2;
             break;
         case COMMAND_STRATEGY:
             if(p[1] == 0x00)
                 state = ROBOT_DRIVER_IDLE_STATE;
+            if(p[1] == 0x01)
+                state = ROBOT_DRIVER_FULL_REMOTE_CONTROL;
             p+=2;
             break;
         case COMMAND_MOTOR_POWER:
-            state = ROBOT_DRIVER_REMOTE_CONTROL_STATE;
+            if(state != ROBOT_DRIVER_FULL_REMOTE_CONTROL)
+                state = ROBOT_DRIVER_REMOTE_CONTROL_STATE;
             if( (lineDec.isHitten() && (int8_t)p[1] > 0 && (int8_t)p[2] > 0 )){
                 motor.move(-10, -10);
             }else{
@@ -59,16 +56,24 @@ void RobotDriver::drive(){
             break;
         }
     }
+    
     switch (state){
         case ROBOT_DRIVER_IDLE_STATE:
             motor.stop();
             lineDec.read();
+            obsDec.move(90);
+            spiConnection.addData(COMMAND_RING_EDGE_DATA, lineDec.getSensorsData());
+            break;
+        case ROBOT_DRIVER_FULL_REMOTE_CONTROL:
+            lineDec.read();
             spiConnection.addData(COMMAND_RING_EDGE_DATA,lineDec.getSensorsData());
+            obsDec.detect();
+            spiConnection.addData(COMMAND_DISTANCE_DATA, obsDec.measurements);
             break;
         case ROBOT_DRIVER_REMOTE_CONTROL_STATE:
             if(millis() - lastTransmissionClock > 100u){
                 state = ROBOT_DRIVER_AUTONOMOUS_STATE;
-                Serial.println("autonomous");
+                // Serial.println("autonomous");
                 break;
             }else if(millis() - lastTransmissionClock > 100u){
                 motor.stop();
@@ -83,7 +88,7 @@ void RobotDriver::drive(){
             autonomous();
             break;
         default:
-            Serial.println("default");
+            // Serial.println("default");
             break;
     }
 

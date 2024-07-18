@@ -40,14 +40,17 @@ class RobotConnection(Connection):
         message = robot.get_next_message()
         while message :
             if message[0] == CommandType.STRATEGY.value:
+                self.transmit_command(message)
                 if message[1] == 0:
                     robot.removeStrategy()
                     robot.isIdle = True
-                    self.transmit_command(message)
                 elif message[1] == 1:
                     robot.removeStrategy()
                     robot.isIdle = False
                 elif message[1] == 2:
+                    robot.removeStrategy()
+                    robot.isIdle = False
+                elif message[1] == 3:
                     robot.isIdle = False
                     robot.setStrategy(Strategy2())
             elif message[0] == CommandType.MOTOR_POWER.value:

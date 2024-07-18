@@ -1,7 +1,5 @@
 #include <Arduino.h>
 #line 1 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
-
-
 #include "server_connection.h"
 #include "spi_master_communication.h"
 #include "esp_camera.h"
@@ -27,12 +25,13 @@ static const uint8_t MAX_LOOP_DURATIONS = 10;  // Defines the number of loop dur
 uint8_t currentDurationIndex = 0;              // Index to keep track of the current loop duration entry
 uint32_t loopDurations[MAX_LOOP_DURATIONS];
 uint32_t totalLoopDuration;
+bool isInFullRemoteControl = false;
 
-#line 29 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+#line 28 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
 uint16_t loopsPerSecond();
-#line 49 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+#line 48 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
 void try_login();
-#line 58 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+#line 57 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
 void onMessageCallback(WebsocketsMessage message);
 #line 82 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
 void onEventsCallback(WebsocketsEvent event, String data);
@@ -44,7 +43,7 @@ void setup();
 void transmitSensorsData();
 #line 187 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
 void loop();
-#line 29 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
+#line 28 "D:\\Proiecte\\KittyKeeper\\esp32\\esp32.ino"
 uint16_t loopsPerSecond(){
   uint32_t timePerLoopInMicrosSec = (totalLoopDuration / MAX_LOOP_DURATIONS);
   if(timePerLoopInMicrosSec == 0)
@@ -86,12 +85,13 @@ void onMessageCallback(WebsocketsMessage message) {
         break;
         case COMMAND_STRATEGY:
             spiCommunication.addData(s, 2);
+            isInFullRemoteControl = (s[1] == 0x01);
         break;
         case COMMAND_VIDEO_STREAMING:
             transmitVideStreaming = (bool) s[1];
         break;
         case COMMAND_MOTOR_POWER:
-            if(loopsPerSecond() > 9)
+            if(isInFullRemoteControl || loopsPerSecond() > 9)
                 spiCommunication.addData(s, 3);
         break;
         default:
